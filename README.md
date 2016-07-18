@@ -2,4 +2,10 @@
 
 * `$ npm install`
 
-* .`$ npm start`
+### Start app
+
+* `$ npm start`
+
+### Star development mode with nodemon
+
+* `$ npm run dev`

@@ -4,6 +4,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
+    "dev": "nodemon .",
     "pretest": "jshint .",
     "posttest": "nsp check"
   },
@@ -15,6 +16,8 @@
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^2.4.0",
     "loopback-datasource-juggler": "^2.39.0",
+    "nodemon": "^1.9.2",
+    "pokemon-go-node-api": "^1.2.2",
     "serve-favicon": "^2.0.1"
   },
   "devDependencies": {

@@ -1,0 +1,23 @@
+{
+  "name": "Trainer",
+  "plural": "Trainers",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "location": {
+      "type": "object",
+      "required": true
+    },
+    "provider": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
