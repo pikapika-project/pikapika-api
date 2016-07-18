@@ -31,5 +31,9 @@
   "Role": {
     "dataSource": "db",
     "public": false
+  },
+  "Trainer": {
+    "dataSource": "db",
+    "public": true
   }
 }
