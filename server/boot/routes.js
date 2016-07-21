@@ -11,11 +11,13 @@ module.exports = function(app) {
         username: req.username,
         password: req.password,
         location: {
-          type: 'coords',
-          name: location.name,
-          latitude: location.latitude,
-          longitude: location.longitude,
-          altitude: location.altitude
+          type  : 'coords',
+          name  : location.name,
+          coords: {
+            latitude : location.latitude,
+            longitude: location.longitude,
+            altitude : location.altitude
+          }
         },
         provider: req.body.provider
       };
