@@ -4,7 +4,6 @@ module.exports = function(app) {
 
   app.post('/login', function(req, res) {
 
-    var location = req.body.location;
     if (req.body) {
 
       var trainer = {
@@ -12,11 +11,11 @@ module.exports = function(app) {
         password: req.password,
         location: {
           type  : 'coords',
-          name  : location.name,
+          name  : req.location.name,
           coords: {
-            latitude : location.latitude,
-            longitude: location.longitude,
-            altitude : location.altitude
+            latitude : req.location.coords.latitude,
+            longitude: req.location.coords.longitude,
+            altitude : req.location.coords.altitude
           }
         },
         provider: req.body.provider
