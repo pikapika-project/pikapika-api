@@ -22,14 +22,12 @@ module.exports = function(app) {
 
       var Pokeio = require('pokemon-go-node-api');
       var WildPokemons = [];
-      var NearbyPokemons = [];
 
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
         if (err) {
           res.json(err);
           return;
         }
-
         Pokeio.Heartbeat(function(err, hb) {
           if (err) {
             res.json(err);
