@@ -11,7 +11,7 @@ module.exports = function(app) {
 
     log('Creating roles and users');
 
-    var User = app.models.Trainer;
+    var User = app.models.User;
 
     var users = [];
     var roles = [{

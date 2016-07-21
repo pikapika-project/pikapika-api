@@ -20,7 +20,8 @@ module.exports = function(app) {
         provider: req.body.provider
       };
 
-      var Pokeio = require('pokemon-go-node-api');
+      var PokemonGO = require('pokemon-go-node-api');
+      var Pokeio = new PokemonGO.Pokeio();
       var WildPokemons = [];
 
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
