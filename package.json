@@ -9,6 +9,7 @@
     "posttest": "nsp check"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
     "bytebuffer": "^5.0.1",
     "compression": "^1.0.3",
     "cors": "^2.5.2",

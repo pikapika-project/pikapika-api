@@ -1,28 +1,28 @@
 var Pokeio = require('pokemon-go-node-api');
 
 module.exports = function(app) {
-  var router = app.loopback.Router();
 
-  router.post('/login', function(req, res) {
-    console.log(req);
-    var trainer = {
-      username: req.username,
-      password: req.password,
-      location: {
-        type: req.location.type || 'coords',
-        name: req.location.name,
-        latitude: req.location.latitude,
-        longitude: req.location.longitude,
-        altitude:  req.location.altitude
-      },
-      provider: req.provider
-    };
+  app.post('/login', function(req, res) {
 
-    var pokemongapi = Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function (err) {
-      if(err) throw err;
-    });
+    var location = req.body.location;
+    if (req.body) {
 
+      var trainer = {
+        username: req.username,
+        password: req.password,
+        location: {
+          type: 'coords',
+          name: location.name,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          altitude: location.altitude
+        },
+        provider: req.body.provider
+      };
+
+      Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
+        if (err) throw err;
+      });
+    }
   });
-
-  app.use(router);
 }
