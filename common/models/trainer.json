@@ -9,11 +9,11 @@
   "properties": {
     "location": {
       "type": "object",
-      "required": true
+      "required": false
     },
     "provider": {
       "type": "string",
-      "required": true
+      "required": false
     }
   },
   "validations": [],
