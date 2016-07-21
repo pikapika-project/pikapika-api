@@ -16,10 +16,6 @@ module.exports = function(Trainer) {
     Pokeio.init(user, password, location, "ptc", function(err) {
       if (err) throw err;
 
-      console.log(Pokeio.playerInfo)
-      console.log('[i] Current location: ' + Pokeio.playerInfo.locationName);
-      console.log('[i] lat/long/alt: : ' + Pokeio.playerInfo.latitude + ' ' + Pokeio.playerInfo.longitude + ' ' + Pokeio.playerInfo.altitude);
-
       var WildPokemons = [];
 
       Pokeio.GetProfile(function(err, profile) {
@@ -35,12 +31,11 @@ module.exports = function(Trainer) {
               WildPokemons.push(item.WildPokemon);
             }
           });
-        console.log(util.inspect(WildPokemons, false, null));
+          // Wildpokemons in the current area
+          console.log(util.inspect(WildPokemons, false, null));
         });
-
       });
     });
-    
     next();
   });
 
