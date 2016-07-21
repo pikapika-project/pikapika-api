@@ -20,6 +20,9 @@ module.exports = function(app) {
         provider: req.body.provider
       };
 
+      var Pokeio = require('pokemon-go-node-api');
+      var NearbyPokemons = [];
+
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
         if (err) throw err;
 
@@ -27,15 +30,14 @@ module.exports = function(app) {
           if (err) {
             console.log(err);
           }
-          for (var i = hb.cells.length - 1; i >= 0; i--) {
-            if (hb.cells[i].NearbyPokemon[0]) {
-              var pokemon = Pokeio.pokemonlist[parseInt(hb.cells[i].NearbyPokemon[0].PokedexNumber) - 1]
-              console.log('[+] There is a ' + pokemon.name + ' at ' + hb.cells[i].NearbyPokemon[0].DistanceMeters.toString() + ' meters')
+          hb.cells.forEach(function(cell) {
+            if (cell.WildPokemon.length > 0) {
+              NearbyPokemons.push(cell.WildPokemon);
             }
-          }
+          });
 
+          res.json({NearbyPokemons});
         });
-
       });
     }
   });

@@ -21,7 +21,7 @@
     "loopback-component-explorer": "^2.4.0",
     "loopback-datasource-juggler": "^2.39.0",
     "nodemon": "^1.9.2",
-    "pokemon-go-node-api": "https://github.com/Armax/Pokemon-GO-node-api.git",
+    "pokemon-go-node-api": "https://github.com/d-pollard/Pokemon-GO-node-api.git",
     "serve-favicon": "^2.0.1"
   },
   "devDependencies": {
