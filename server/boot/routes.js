@@ -21,22 +21,29 @@ module.exports = function(app) {
       };
 
       var Pokeio = require('pokemon-go-node-api');
+      var WildPokemons = [];
       var NearbyPokemons = [];
 
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
-        if (err) throw err;
+        if (err) {
+          res.json(err);
+          return;
+        }
 
         Pokeio.Heartbeat(function(err, hb) {
           if (err) {
-            console.log(err);
+            res.json(err);
+            return;
           }
           hb.cells.forEach(function(cell) {
             if (cell.WildPokemon.length > 0) {
-              NearbyPokemons.push(cell.WildPokemon);
+              WildPokemons.push(cell.WildPokemon);
+              WildPokemons[0].forEach(function(wildPokemon, i) {
+                wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
+              });
             }
           });
-
-          res.json({NearbyPokemons});
+          res.json(WildPokemons[0]);
         });
       });
     }
