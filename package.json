@@ -4,7 +4,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
-    "dev": "nodemon .",
+   "dev": "nodemon server/server.js --watch server --watch common --ext js,json ",
     "pretest": "jshint .",
     "posttest": "nsp check"
   },
@@ -33,5 +33,13 @@
     "url": ""
   },
   "license": "UNLICENSED",
-  "description": "pokeradar-api"
+  "description": "pokeradar-api",
+  "keywords": [
+    "pokemon",
+    "go",
+    "api",
+    "node",
+    "pokemon-go"
+  ]
+
 }

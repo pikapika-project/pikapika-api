@@ -5,17 +5,18 @@ module.exports = function(app) {
   app.post('/login', function(req, res) {
 
     if (req.body) {
-
+      var location = req.location;
+      console.log(location);
       var trainer = {
         username: req.username,
         password: req.password,
         location: {
-          type  : 'coords',
-          name  : req.location.name,
+          type: 'coords',
+          name: location.name,
           coords: {
-            latitude : req.location.coords.latitude,
-            longitude: req.location.coords.longitude,
-            altitude : req.location.coords.altitude
+            latitude : location.coords.latitude,
+            longitude: location.coords.longitude,
+            altitude : location.coords.altitude
           }
         },
         provider: req.body.provider
