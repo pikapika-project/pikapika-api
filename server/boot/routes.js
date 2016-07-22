@@ -36,15 +36,16 @@ module.exports = function(app) {
             res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: "" + err}});
             return;
           }
+
           hb.cells.forEach(function(cell) {
             if (cell.WildPokemon.length > 0) {
-              WildPokemons.push(cell.WildPokemon);
-              WildPokemons[0].forEach(function(wildPokemon, i) {
+              WildPokemons.concat(cell.WildPokemon);
+              WildPokemons.forEach(function(wildPokemon, i) {
                 wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
               });
             }
           });
-          res.json(WildPokemons[0]);
+          res.json({data: WildPokemons});
         });
       });
     }
