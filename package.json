@@ -4,7 +4,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node .",
-   "dev": "nodemon server/server.js --watch server --watch common --ext js,json ",
+    "dev": "nodemon server/server.js --watch server --watch common --ext js,json ",
     "pretest": "jshint .",
     "posttest": "nsp check"
   },
@@ -41,5 +41,4 @@
     "node",
     "pokemon-go"
   ]
-
 }
