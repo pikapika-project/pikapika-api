@@ -26,12 +26,14 @@ module.exports = function(app) {
 
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
         if (err) {
-          res.json(err);
+          var statusCode = err.statusCode || 500;
+          res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: "" + err.response}});
           return;
         }
         Pokeio.Heartbeat(function(err, hb) {
           if (err) {
-            res.json(err);
+            var statusCode = err.statusCode || 500;
+            res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: "" + err}});
             return;
           }
           hb.cells.forEach(function(cell) {
