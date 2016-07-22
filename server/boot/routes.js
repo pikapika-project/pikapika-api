@@ -43,7 +43,6 @@ module.exports = function(app) {
         accessToken: Pokeio.playerInfo.accessToken,
         latitude: trainer.location.coords.latitude,
         longitude: trainer.location.coords.latitude,
-        altitude: 0,
         provider: trainer.provider,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
@@ -94,13 +93,13 @@ module.exports = function(app) {
 
     Trainer.find({
       where: {
-        accessToken: req.query.accessToken
+        accessToken: req.query.access_token
       }
     }, function(err, returnedInstance) {
       if (err) {
         sendError(trainer, err, res);
       }
-      if (returnedInstance[0].length > 0) {
+      if (returnedInstance[0]) {
         var Pokeio = new PokemonGO.Pokeio();
         Pokeio.playerInfo = returnedInstance[0];
 
@@ -110,6 +109,7 @@ module.exports = function(app) {
             sendError(trainer, err, res);
             return false;
           }
+          console.log(hb);
           hb.cells.forEach(function(cell) {
             if (cell.WildPokemon.length > 0) {
               WildPokemons = cell.WildPokemon;
