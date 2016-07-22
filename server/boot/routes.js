@@ -80,8 +80,13 @@ module.exports = function(app) {
         if (err) {
           sendError(trainer, err, res);
         }
-        console.log(createdTrainer);
-        console.log(created);
+        if(!created){
+          createdTrainer.updateAttributes(newTrainer,function (err, instance) {
+            if (err) {
+              sendError(trainer, err, res);
+            }
+          });
+        }
       });
 
       trainers[Pokeio.playerInfo.accessToken] = Pokeio.playerInfo;
