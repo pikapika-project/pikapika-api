@@ -66,7 +66,7 @@ module.exports = function(app) {
       });
 
       var data = {
-        accessToken: session.token,
+        access_token: session.token,
         expire_time: session.expire_time
       };
 
@@ -76,9 +76,9 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pokemons/heartbeat', function(req, res) {
+  app.get('/pokemons/heartbeat/:lat/:lng', function(req, res) {
 
-    if (!req.query.accessToken) {
+    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -93,7 +93,7 @@ module.exports = function(app) {
 
     Trainer.find({
       where: {
-        accessToken: req.query.access_token
+        access_token: req.query.access_token
       }
     }, function(err, returnedInstance) {
       if (err) {
@@ -102,27 +102,37 @@ module.exports = function(app) {
       if (returnedInstance[0]) {
         var Pokeio = new PokemonGO.Pokeio();
         Pokeio.playerInfo = returnedInstance[0];
-
-        var WildPokemons = [];
-        Pokeio.Heartbeat(function(err, hb) {
+        Pokeio.SetLocation({
+          type: "coords",
+          coords: {
+            latitude: parseFloat(req.params.lat),
+            longitude: parseFloat(req.params.lng),
+            altitude: 0
+          }
+        }, function(err, response) {
           if (err) {
             sendError(trainer, err, res);
             return false;
           }
-          console.log(hb);
-          hb.cells.forEach(function(cell) {
-            if (cell.WildPokemon.length > 0) {
-              WildPokemons = cell.WildPokemon;
-              WildPokemons.forEach(function(wildPokemon, i) {
-                wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
-              });
-            }
-          });
-          console.log(WildPokemons);
-          res.json({
-            data: WildPokemons
-          });
+          var WildPokemons = [];
 
+          Pokeio.Heartbeat(function(err, hb) {
+            if (err) {
+              sendError(trainer, err, res);
+              return false;
+            }
+            hb.cells.forEach(function(cell) {
+              if (cell.WildPokemon.length > 0) {
+                WildPokemons = cell.WildPokemon;
+                WildPokemons.forEach(function(wildPokemon, i) {
+                  wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
+                });
+              }
+            });
+            res.json({
+              data: WildPokemons
+            });
+          });
         });
       }
     });
