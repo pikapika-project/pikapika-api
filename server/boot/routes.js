@@ -39,7 +39,7 @@ module.exports = function(app) {
 
           hb.cells.forEach(function(cell) {
             if (cell.WildPokemon.length > 0) {
-              WildPokemons.concat(cell.WildPokemon);
+              WildPokemons = cell.WildPokemon;
               WildPokemons.forEach(function(wildPokemon, i) {
                 wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
               });
