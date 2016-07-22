@@ -41,14 +41,14 @@ module.exports = function(app) {
       res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: statusMessage}});
     }
 
-    Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
+    Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
       if (err) {
         sendError(trainer, err, res);
         return false;
       }
 
-      trainers[Pokeio.playerInfo.accessToken] = Pokeio.playerInfo;
-      var data = {apiEndpoint: Pokeio.playerInfo.apiEndpoint, accessToken: Pokeio.playerInfo.accessToken};
+      trainers[session.token] = Pokeio.playerInfo;
+      var data = {accessToken: session.token, expire_time: session.expire_time};
 
       res.json({data: data});
     });
