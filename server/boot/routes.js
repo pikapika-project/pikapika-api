@@ -4,7 +4,7 @@ var trainers = [];
 
 module.exports = function(app) {
 
-  app.post('/trainer/login', function(req, res) {
+  app.post('/trainers/login', function(req, res) {
 
     if (!req.body) {
       res.status(404).json({error: {statusCode: 404, statusMessage: "Missing parameters."}});
