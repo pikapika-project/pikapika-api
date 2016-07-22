@@ -56,12 +56,12 @@ module.exports = function(app) {
 
   app.get('/pokemons/heartbeat', function(req, res) {
 
-    if (!req.query.accessToken) {
+    if (!req.query.access_token) {
       res.status(404).json({error: {statusCode: 404, statusMessage: "Missing parameters."}});
     }
 
     var Pokeio = new PokemonGO.Pokeio();
-    Pokeio.playerInfo = trainers[req.query.accessToken];
+    Pokeio.playerInfo = trainers[req.query.access_token];
 
     var WildPokemons = [];
 
