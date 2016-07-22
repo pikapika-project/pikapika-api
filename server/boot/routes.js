@@ -27,17 +27,12 @@ module.exports = function(app) {
       function sendError(trainer, err, res) {
         var statusCode, statusMessage;
 
-        if (trainer.provider === 'google') {
-          if (err instanceof Error) {
-            statusCode = err.statusCode || 400;
-            statusMessage = err.message;
-          } else {
-            statusCode = err.response.statusCode || 400;
-            statusMessage = err.response.statusMessage;
-          }
-        } else if (trainer.provider === 'ptc') {
-          statusCode = 400;
+        if (err instanceof Error) {
+          statusCode = err.statusCode || 400;
           statusMessage = err.message;
+        } else {
+          statusCode = err.response.statusCode || 400;
+          statusMessage = err.response.statusMessage;
         }
 
         res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: statusMessage}});
