@@ -15,25 +15,6 @@
       "type": "string",
       "required": true
     },
-    "debug": {
-      "type": "boolean"
-    },
-    "latitude": {
-      "type": "number",
-      "required": true
-    },
-    "longitude": {
-      "type": "number",
-      "required": true
-    },
-    "altitude": {
-      "type": "number",
-      "required": true
-    },
-    "locationName": {
-      "type": "string",
-      "required": false
-    },
     "provider": {
       "type": "string",
       "required": true

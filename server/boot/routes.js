@@ -1,7 +1,5 @@
 var PokemonGO = require('pokemon-go-node-api');
 
-var trainers = [];
-
 module.exports = function(app) {
 
   app.post('/trainers/login', function(req, res) {
@@ -32,25 +30,6 @@ module.exports = function(app) {
 
     var Pokeio = new PokemonGO.Pokeio();
 
-    function sendError(trainer, err, res) {
-      var statusCode, statusMessage;
-
-      if (err instanceof Error) {
-        statusCode = err.statusCode || 400;
-        statusMessage = err.message;
-      } else {
-        statusCode = err.response.statusCode || 400;
-        statusMessage = err.response.statusMessage;
-      }
-
-      res.status(statusCode).json({
-        error: {
-          statusCode: statusCode,
-          statusMessage: statusMessage
-        }
-      });
-    }
-
     Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
       if (err) {
         sendError(trainer, err, res);
@@ -62,11 +41,9 @@ module.exports = function(app) {
       var newTrainer = {
         username: trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        debug: false,
         latitude: trainer.location.coords.latitude,
         longitude: trainer.location.coords.latitude,
         altitude: 0,
-        locationName: "",
         provider: trainer.provider,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
@@ -80,8 +57,8 @@ module.exports = function(app) {
         if (err) {
           sendError(trainer, err, res);
         }
-        if(!created){
-          createdTrainer.updateAttributes(newTrainer,function (err, instance) {
+        if (!created) {
+          createdTrainer.updateAttributes(newTrainer, function(err, instance) {
             if (err) {
               sendError(trainer, err, res);
             }
@@ -89,7 +66,6 @@ module.exports = function(app) {
         }
       });
 
-      trainers[Pokeio.playerInfo.accessToken] = Pokeio.playerInfo;
       var data = {
         accessToken: session.token,
         expire_time: session.expire_time
@@ -112,30 +88,63 @@ module.exports = function(app) {
       });
     }
 
-    var Pokeio = new PokemonGO.Pokeio();
-    Pokeio.playerInfo = trainers[req.query.access_token];
+    Trainer = app.models.trainer;
 
-    var WildPokemons = [];
+    var logedTrainer = [];
 
-    Pokeio.Heartbeat(function(err, hb) {
+    Trainer.find({
+      where: {
+        accessToken: req.query.accessToken
+      }
+    }, function(err, returnedInstance) {
       if (err) {
         sendError(trainer, err, res);
-        return false;
       }
+      if (returnedInstance[0].length > 0) {
+        var Pokeio = new PokemonGO.Pokeio();
+        Pokeio.playerInfo = returnedInstance[0];
 
-      hb.cells.forEach(function(cell) {
-        if (cell.WildPokemon.length > 0) {
-          WildPokemons = cell.WildPokemon;
-          WildPokemons.forEach(function(wildPokemon, i) {
-            wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
+        var WildPokemons = [];
+        Pokeio.Heartbeat(function(err, hb) {
+          if (err) {
+            sendError(trainer, err, res);
+            return false;
+          }
+          hb.cells.forEach(function(cell) {
+            if (cell.WildPokemon.length > 0) {
+              WildPokemons = cell.WildPokemon;
+              WildPokemons.forEach(function(wildPokemon, i) {
+                wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
+              });
+            }
           });
-        }
-      });
+          console.log(WildPokemons);
+          res.json({
+            data: WildPokemons
+          });
 
-      res.json({
-        data: WildPokemons
-      });
+        });
+      }
     });
   });
+
+  function sendError(trainer, err, res) {
+    var statusCode, statusMessage;
+
+    if (err instanceof Error) {
+      statusCode = err.statusCode || 400;
+      statusMessage = err.message;
+    } else {
+      statusCode = err.response.statusCode || 400;
+      statusMessage = err.response.statusMessage;
+    }
+
+    res.status(statusCode).json({
+      error: {
+        statusCode: statusCode,
+        statusMessage: statusMessage
+      }
+    });
+  }
 
 }
