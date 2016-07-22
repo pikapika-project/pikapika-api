@@ -42,7 +42,7 @@ module.exports = function(app) {
         username: trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
         latitude: trainer.location.coords.latitude,
-        longitude: trainer.location.coords.latitude,
+        longitude: trainer.location.coords.longitude,
         provider: trainer.provider,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
@@ -76,7 +76,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pokemons/heartbeat/:lat/:lng', function(req, res) {
+  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res) {
 
     if (!req.query.access_token && !req.params.lat && !req.params.lng) {
       res.status(404).json({
@@ -93,7 +93,7 @@ module.exports = function(app) {
 
     Trainer.find({
       where: {
-        access_token: req.query.access_token
+        accessToken: req.query.access_token
       }
     }, function(err, returnedInstance) {
       if (err) {
@@ -124,8 +124,9 @@ module.exports = function(app) {
             hb.cells.forEach(function(cell) {
               if (cell.WildPokemon.length > 0) {
                 WildPokemons = cell.WildPokemon;
-                WildPokemons.forEach(function(wildPokemon, i) {
-                  wildPokemon.pokeinfo = Pokeio.pokemonlist[wildPokemon.pokemon.PokemonId - 1];
+
+                WildPokemons.forEach(function(wp, i) {
+                  wp.pokemon.PokemonName = Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name;
                 });
               }
             });
