@@ -1,5 +1,10 @@
 {
   "name": "trainer",
+  "settings": {
+    "mongodb": {
+      "allowExtendedOperators": true
+    }
+  },
   "plural": "trainers",
   "base": "PersistedModel",
   "idInjection": true,
