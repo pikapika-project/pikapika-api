@@ -24,17 +24,34 @@ module.exports = function(app) {
       var Pokeio = new PokemonGO.Pokeio();
       var WildPokemons = [];
 
+      function sendError(trainer, err, res) {
+        var statusCode, statusMessage;
+
+        if (trainer.provider === 'google') {
+          if (err instanceof Error) {
+            statusCode = err.statusCode || 400;
+            statusMessage = err.message;
+          } else {
+            statusCode = err.response.statusCode || 400;
+            statusMessage = err.response.statusMessage;
+          }
+        } else if (trainer.provider === 'ptc') {
+          statusCode = 400;
+          statusMessage = err.message;
+        }
+
+        res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: statusMessage}});
+      }
+
       Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err) {
         if (err) {
-          var statusCode = err.statusCode || 500;
-          res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: "" + err.response}});
-          return;
+          sendError(trainer, err, res);
+          return false;
         }
         Pokeio.Heartbeat(function(err, hb) {
           if (err) {
-            var statusCode = err.statusCode || 500;
-            res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: "" + err}});
-            return;
+            sendError(trainer, err, res);
+            return false;
           }
 
           hb.cells.forEach(function(cell) {
