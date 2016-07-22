@@ -7,7 +7,12 @@ module.exports = function(app) {
   app.post('/trainers/login', function(req, res) {
 
     if (!req.body) {
-      res.status(404).json({error: {statusCode: 404, statusMessage: "Missing parameters."}});
+      res.status(404).json({
+        error: {
+          statusCode: 404,
+          statusMessage: "Missing parameters."
+        }
+      });
     }
 
     var trainer = {
@@ -38,7 +43,12 @@ module.exports = function(app) {
         statusMessage = err.response.statusMessage;
       }
 
-      res.status(statusCode).json({error: {statusCode: statusCode, statusMessage: statusMessage}});
+      res.status(statusCode).json({
+        error: {
+          statusCode: statusCode,
+          statusMessage: statusMessage
+        }
+      });
     }
 
     Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
@@ -47,17 +57,54 @@ module.exports = function(app) {
         return false;
       }
 
-      trainers[session.token] = Pokeio.playerInfo;
-      var data = {accessToken: session.token, expire_time: session.expire_time};
+      Trainer = app.models.trainer;
 
-      res.json({data: data});
+      var newTrainer = {
+        username: trainer.username,
+        accessToken: Pokeio.playerInfo.accessToken,
+        debug: false,
+        latitude: trainer.location.coords.latitude,
+        longitude: trainer.location.coords.latitude,
+        altitude: 0,
+        locationName: "",
+        provider: trainer.provider,
+        apiEndpoint: Pokeio.playerInfo.apiEndpoint
+      }
+
+      Trainer.findOrCreate({
+        where: {
+          username: trainer.username,
+          provider: trainer.provider
+        }
+      }, newTrainer, function(err, createdTrainer, created) {
+        if (err) {
+          sendError(trainer, err, res);
+        }
+        console.log(createdTrainer);
+        console.log(created);
+      });
+
+      trainers[Pokeio.playerInfo.accessToken] = Pokeio.playerInfo;
+      var data = {
+        accessToken: session.token,
+        expire_time: session.expire_time
+      };
+
+      res.json({
+        data: data
+      });
     });
   });
 
   app.get('/pokemons/heartbeat', function(req, res) {
 
-    if (!req.query.access_token) {
-      res.status(404).json({error: {statusCode: 404, statusMessage: "Missing parameters."}});
+    if (!req.query.accessToken) {
+      res.status(404).json({
+        error: {
+          statusCode: 404,
+          statusMessage: "Missing parameters."
+        }
+      });
     }
 
     var Pokeio = new PokemonGO.Pokeio();
@@ -80,7 +127,9 @@ module.exports = function(app) {
         }
       });
 
-      res.json({data: WildPokemons});
+      res.json({
+        data: WildPokemons
+      });
     });
   });
 
