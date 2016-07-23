@@ -41,8 +41,6 @@ module.exports = function(app) {
       var newTrainer = {
         username: trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        latitude: trainer.location.coords.latitude,
-        longitude: trainer.location.coords.longitude,
         provider: trainer.provider,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
