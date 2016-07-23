@@ -1,3 +1,4 @@
+var GeoPoint = require('loopback').GeoPoint;
 var PokemonGO = require('pokemon-go-node-api');
 var Promise = require("bluebird");
 const s2 = require('s2geometry-node');
@@ -72,22 +73,27 @@ module.exports = function(app) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                       var wp = resolves[i].cells[a].WildPokemon[x];
 
+                      var now = new Date();
                       WildPokemons.push({
                         id:        wp.SpawnPointId,
                         number:    wp.pokemon.PokemonId,
                         name:      Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
                         latitude:  wp.Latitude,
                         longitude: wp.Longitude,
-                        timeleft:  wp.TimeTillHiddenMs
+                        timeleft:  wp.TimeTillHiddenMs,
+                        createdAt: now,
+                        expireAt:  new Date(now.getTime() + wp.TimeTillHiddenMs)
                       });
                     }
                   }
                 }
               }
 
-              res.json({
-                data:        WildPokemons,
-                data_length: WildPokemons.length
+              app.models.pokemon.create(WildPokemons, function (err, obj) {
+                res.json({
+                  data:        WildPokemons,
+                  data_length: WildPokemons.length
+                });
               });
             });
         }).catch(err => {
