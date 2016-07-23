@@ -25,7 +25,6 @@ module.exports = function(app) {
       if (err) {
         sendError(err, res);
       }
-
       if (returnedInstance[0]) {
         var coords = {
           type: "coords",
@@ -36,46 +35,55 @@ module.exports = function(app) {
           }
         };
         var WildPokemons = [];
+        var NearbyPokemons = [];
+        var MapPokemons = [];
         var cells = []
         var Pokeio = new PokemonGO.Pokeio();
 
         Pokeio.playerInfo = returnedInstance[0];
 
-        Pokeio.SetLocation(coords, function(err, response) {
+        Pokeio.Heartbeat(function(err, hb) {
           if (err) {
             sendError(err, res);
             return false;
           }
-          Pokeio.Heartbeat(function(err, hb) {
-            if (err) {
-              sendError(err, res);
-              return false;
+          hb.cells.forEach(function(cell) {
+
+            // Getting Ubcation of each cell
+
+            var cellId = new s2.S2CellId(cell.S2CellId.toString());
+            var thisCell = new s2.S2Cell(cellId);
+            var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
+            latLng = latLng.split(',');
+
+            cells.push({
+              lat: latLng[0],
+              lng: latLng[1]
+            });
+            if (cell.WildPokemon.length > 0) {
+              WildPokemons = cell.WildPokemon;
+              WildPokemons.forEach(function(wp, i) {
+                wp.pokemon.PokemonName = Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name;
+              });
             }
-            hb.cells.forEach(function(cell) {
+            if (cell.NearbyPokemon.length > 0) {
+              NearbyPokemons.push(cell.NearbyPokemon)
+            }
+            if (cell.MapPokemon.length > 0) {
+              MapPokemons.push(cell.MapPokemon)
+            }
+          });
 
-              // Getting Ubcation of each cell
-
-              //  var cellId = new s2.S2CellId(cell.S2CellId.toString());
-              //  var thisCell = new s2.S2Cell(cellId);
-              //  var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
-              //  latLng = latLng.split(',');
-              //  cells.push({lat: latLng[0], lng: latLng[1]});
-              if (cell.WildPokemon.length > 0) {
-                WildPokemons = cell.WildPokemon;
-                WildPokemons.forEach(function(wp, i) {
-                  wp.pokemon.PokemonName = Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name;
-                });
-              }
-            });
-
-            res.json({
-              data: WildPokemons
-            });
+          res.json({
+            data: WildPokemons,
+            nerby: NearbyPokemons,
+            MapPokemons: MapPokemons
           });
         });
       }
     });
   });
+
 
   function sendError(err, res) {
     var statusCode, statusMessage;
