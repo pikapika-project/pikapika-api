@@ -51,11 +51,15 @@ module.exports = function(app) {
               return false;
             }
             hb.cells.forEach(function(cell) {
-              // var cellId = new s2.S2CellId(cell.S2CellId.toString());
-              // var thisCell = new s2.S2Cell(cellId);
-              // var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
-              // latLng = latLng.split(',');
-              // cells.push({lat: latLng[0], lng: latLng[1]});
+
+              // Getting Ubcation of each cell
+
+              //  var cellId = new s2.S2CellId(cell.S2CellId.toString());
+              //  var thisCell = new s2.S2Cell(cellId);
+              //  var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
+              //  latLng = latLng.split(',');
+              //  cells.push({lat: latLng[0], lng: latLng[1]});
+              
               if (cell.WildPokemon.length > 0) {
                 WildPokemons = cell.WildPokemon;
                 WildPokemons.forEach(function(wp, i) {
