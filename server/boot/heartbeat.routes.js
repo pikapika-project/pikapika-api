@@ -1,10 +1,11 @@
 var PokemonGO = require('pokemon-go-node-api');
+var Promise = require("bluebird");
 const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
-  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res) {
+  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
-    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
+    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -42,48 +43,58 @@ module.exports = function(app) {
 
         Pokeio.playerInfo = returnedInstance[0];
 
-        Pokeio.Heartbeat(function(err, hb) {
-          if (err) {
-            sendError(err, res);
-            return false;
-          }
-          hb.cells.forEach(function(cell) {
+        var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
+        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
 
-            // Getting Ubcation of each cell
-
-            var cellId = new s2.S2CellId(cell.S2CellId.toString());
+        FirstHearbeat().then(hb => {
+          for (var i = 0; i < hb.cells.length; i++) {
+            var cellId = new s2.S2CellId(hb.cells[i].S2CellId.toString());
             var thisCell = new s2.S2Cell(cellId);
             var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
             latLng = latLng.split(',');
-
             cells.push({
               lat: latLng[0],
               lng: latLng[1]
             });
-            if (cell.WildPokemon.length > 0) {
-              WildPokemons = cell.WildPokemon;
-              WildPokemons.forEach(function(wp, i) {
-                wp.pokemon.PokemonName = Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name;
-              });
-            }
-            if (cell.NearbyPokemon.length > 0) {
-              NearbyPokemons.push(cell.NearbyPokemon)
-            }
-            if (cell.MapPokemon.length > 0) {
-              MapPokemons.push(cell.MapPokemon)
-            }
-          });
+          }
 
-          res.json({
-            data: WildPokemons,
-            nerby: NearbyPokemons,
-            MapPokemons: MapPokemons
-          });
+          var qs = [];
+
+          for (var a = 0; a < cells.length; a++) {
+            Pokeio.playerInfo.latitude = parseFloat(cells[a].lat);
+            Pokeio.playerInfo.longitude = parseFloat(cells[a].lng);
+
+            (function(arguments) {
+              qs.push(Hearbeat());
+            })();
+          }
+          Promise.all(qs)
+            .then(function(resolves) {
+              for (var i = 0; i < resolves.length; i++) {
+                for (var a = 0; a < resolves[i].cells.length; a++) {
+                  if (resolves[i].cells[a].WildPokemon.length > 0) {
+                    for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
+                      resolves[i].cells[a].WildPokemon[x].pokemon.PokemonName =
+                        Pokeio.pokemonlist[resolves[i].cells[a].WildPokemon[x].pokemon.PokemonId - 1].name;
+                      WildPokemons.push(resolves[i].cells[a].WildPokemon[x]);
+                    }
+                  }
+                }
+              }
+              res.json({
+                data: WildPokemons,
+                datalength: WildPokemons.length
+              });
+            });
+        }).catch(err => {
+          if (err) {
+            sendError(err, res);
+            return false;
+          }
         });
       }
     });
   });
-
 
   function sendError(err, res) {
     var statusCode, statusMessage;

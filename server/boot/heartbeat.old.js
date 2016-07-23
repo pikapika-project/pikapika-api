@@ -2,7 +2,7 @@ var PokemonGO = require('pokemon-go-node-api');
 const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
-  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res) {
+  app.get('/pokemons/:lat/:lng/old', function(req, res) {
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
