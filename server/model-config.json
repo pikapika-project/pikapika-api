@@ -33,7 +33,7 @@
     "public": false
   },
   "trainer": {
-    "dataSource": "db",
+    "dataSource": "mongo",
     "public": true
   }
 }

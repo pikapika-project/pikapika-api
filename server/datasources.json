@@ -2,5 +2,12 @@
   "db": {
     "name": "db",
     "connector": "memory"
+  },
+  "mongo": {
+    "name": "mongo",
+    "connector": "mongodb",
+    "host": "167.114.246.236",
+    "port": 27017,
+    "database": "pikapika"
   }
 }
