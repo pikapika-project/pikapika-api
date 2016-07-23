@@ -59,7 +59,6 @@ module.exports = function(app) {
               //  var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
               //  latLng = latLng.split(',');
               //  cells.push({lat: latLng[0], lng: latLng[1]});
-              
               if (cell.WildPokemon.length > 0) {
                 WildPokemons = cell.WildPokemon;
                 WildPokemons.forEach(function(wp, i) {
@@ -76,10 +75,6 @@ module.exports = function(app) {
       }
     });
   });
-
-  function getAllPokemons(arrayOfCells) {
-
-  }
 
   function sendError(err, res) {
     var statusCode, statusMessage;
