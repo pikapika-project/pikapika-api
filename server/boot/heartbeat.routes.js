@@ -3,19 +3,19 @@ var Promise = require("bluebird");
 const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
+
   app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
-          statusCode: 404,
+          statusCode:    404,
           statusMessage: "Missing parameters."
         }
       });
     }
 
     Trainer = app.models.trainer;
-    var logedTrainer = [];
     var filter = {
       where: {
         accessToken: req.query.access_token
@@ -28,35 +28,35 @@ module.exports = function(app) {
       }
 
       if (returnedInstance[0]) {
-        var WildPokemons = [];
+        var WildPokemons   = [];
         var NearbyPokemons = [];
-        var MapPokemons = [];
-        var cells = []
-        var Pokeio = new PokemonGO.Pokeio();
+        var MapPokemons    = [];
+        var cells          = [];
+        var Pokeio         = new PokemonGO.Pokeio();
 
-        Pokeio.playerInfo = returnedInstance[0];
-        Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
+        Pokeio.playerInfo           = returnedInstance[0];
+        Pokeio.playerInfo.latitude  = parseFloat(req.params.lat);
         Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
 
         var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
-        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
+        var Hearbeat      = Promise.promisify(Pokeio.Heartbeat);
 
         FirstHearbeat().then(hb => {
+          var qs = [];
+
           for (var i = 0; i < hb.cells.length; i++) {
-            var cellId = new s2.S2CellId(hb.cells[i].S2CellId.toString());
+            var cellId   = new s2.S2CellId(hb.cells[i].S2CellId.toString());
             var thisCell = new s2.S2Cell(cellId);
-            var latLng = new s2.S2LatLng(thisCell.getCenter()).toString();
-            latLng = latLng.split(',');
+            var latLng   = new s2.S2LatLng(thisCell.getCenter()).toString().split(',');
+
             cells.push({
               lat: latLng[0],
               lng: latLng[1]
             });
           }
 
-          var qs = [];
-
           for (var a = 0; a < cells.length; a++) {
-            Pokeio.playerInfo.latitude = parseFloat(cells[a].lat);
+            Pokeio.playerInfo.latitude  = parseFloat(cells[a].lat);
             Pokeio.playerInfo.longitude = parseFloat(cells[a].lng);
 
             (function(arguments) {
@@ -79,7 +79,7 @@ module.exports = function(app) {
               }
 
               res.json({
-                data: WildPokemons,
+                data:        WildPokemons,
                 data_length: WildPokemons.length
               });
             });
@@ -97,16 +97,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
+      statusCode    = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode = err.response.statusCode || 400;
+      statusCode    = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode: statusCode,
+        statusCode:    statusCode,
         statusMessage: statusMessage
       }
     });
