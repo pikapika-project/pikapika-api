@@ -4,7 +4,7 @@ const s2 = require('s2geometry-node');
 module.exports = function(app) {
   app.get('/pokemons/:lat/:lng/heartbeat', function(req, res) {
 
-    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
+    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -25,6 +25,7 @@ module.exports = function(app) {
       if (err) {
         sendError(err, res);
       }
+
       if (returnedInstance[0]) {
         var coords = {
           type: "coords",
@@ -66,7 +67,7 @@ module.exports = function(app) {
                 });
               }
             });
-            console.log(cells);
+
             res.json({
               data: WildPokemons
             });

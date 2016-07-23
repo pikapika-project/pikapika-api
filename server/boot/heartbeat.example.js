@@ -4,7 +4,7 @@ const s2 = require('s2geometry-node');
 module.exports = function(app) {
   app.get('/pokemons/:lat/:lng/all', function(req, res) {
 
-    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
+    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -73,6 +73,7 @@ module.exports = function(app) {
               MapPokemons.push(cell.MapPokemon)
             }
           });
+
           res.json({
             data: WildPokemons,
             nerby: NearbyPokemons,
