@@ -5,7 +5,7 @@ const s2 = require('s2geometry-node');
 module.exports = function(app) {
   app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
-    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
+    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -26,15 +26,8 @@ module.exports = function(app) {
       if (err) {
         sendError(err, res);
       }
+
       if (returnedInstance[0]) {
-        var coords = {
-          type: "coords",
-          coords: {
-            latitude: parseFloat(req.params.lat),
-            longitude: parseFloat(req.params.lng),
-            altitude: 0
-          }
-        };
         var WildPokemons = [];
         var NearbyPokemons = [];
         var MapPokemons = [];
@@ -42,6 +35,8 @@ module.exports = function(app) {
         var Pokeio = new PokemonGO.Pokeio();
 
         Pokeio.playerInfo = returnedInstance[0];
+        Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
+        Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
 
         var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
         var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
@@ -68,6 +63,7 @@ module.exports = function(app) {
               qs.push(Hearbeat());
             })();
           }
+
           Promise.all(qs)
             .then(function(resolves) {
               for (var i = 0; i < resolves.length; i++) {
@@ -81,9 +77,10 @@ module.exports = function(app) {
                   }
                 }
               }
+
               res.json({
                 data: WildPokemons,
-                datalength: WildPokemons.length
+                data_length: WildPokemons.length
               });
             });
         }).catch(err => {
