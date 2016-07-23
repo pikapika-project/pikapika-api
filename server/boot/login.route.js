@@ -32,7 +32,7 @@ module.exports = function(app) {
 
     Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
       if (err) {
-        sendError(trainer, err, res);
+        sendError(err, res);
         return false;
       }
 
@@ -54,12 +54,12 @@ module.exports = function(app) {
         }
       }, newTrainer, function(err, createdTrainer, created) {
         if (err) {
-          sendError(trainer, err, res);
+          sendError(err, res);
         }
         if (!created) {
           createdTrainer.updateAttributes(newTrainer, function(err, instance) {
             if (err) {
-              sendError(trainer, err, res);
+              sendError(err, res);
             }
           });
         }
@@ -76,70 +76,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res) {
-
-    if (!req.query.access_token && !req.params.lat && !req.params.lng) {
-      res.status(404).json({
-        error: {
-          statusCode: 404,
-          statusMessage: "Missing parameters."
-        }
-      });
-    }
-
-    Trainer = app.models.trainer;
-
-    var logedTrainer = [];
-
-    Trainer.find({
-      where: {
-        accessToken: req.query.access_token
-      }
-    }, function(err, returnedInstance) {
-      if (err) {
-        sendError(trainer, err, res);
-      }
-      if (returnedInstance[0]) {
-        var Pokeio = new PokemonGO.Pokeio();
-        Pokeio.playerInfo = returnedInstance[0];
-        Pokeio.SetLocation({
-          type: "coords",
-          coords: {
-            latitude: parseFloat(req.params.lat),
-            longitude: parseFloat(req.params.lng),
-            altitude: 0
-          }
-        }, function(err, response) {
-          if (err) {
-            sendError(trainer, err, res);
-            return false;
-          }
-          var WildPokemons = [];
-
-          Pokeio.Heartbeat(function(err, hb) {
-            if (err) {
-              sendError(trainer, err, res);
-              return false;
-            }
-            hb.cells.forEach(function(cell) {
-              if (cell.WildPokemon.length > 0) {
-                WildPokemons = cell.WildPokemon;
-
-                WildPokemons.forEach(function(wp, i) {
-                  wp.pokemon.PokemonName = Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name;
-                });
-              }
-            });
-            res.json({
-              data: WildPokemons
-            });
-          });
-        });
-      }
-    });
-  });
-
-  function sendError(trainer, err, res) {
+  function sendError(err, res) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
