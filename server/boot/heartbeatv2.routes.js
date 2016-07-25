@@ -50,9 +50,10 @@ module.exports = function(app) {
 
           var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
 
-          for (var i = 0; i < coordsToScan.length; i++) {
-            Pokeio.playerInfo.latitude = parseFloat(coordsToScan[i].lat);
-            Pokeio.playerInfo.longitude = parseFloat(coordsToScan[i].lng);
+          for (var s = 0; s < coordsToScan.length; s++) {
+
+            Pokeio.playerInfo.latitude = coordsToScan[s].lat;
+            Pokeio.playerInfo.longitude = coordsToScan[s].ln);
 
             (function(arguments) {
               qs.push(Hearbeat());
@@ -83,7 +84,6 @@ module.exports = function(app) {
                 }
               }
               app.models.pokemon.create(WildPokemons, function(err, obj) {
-                console.log(WildPokemons);
                 res.json({
                   data: WildPokemons,
                   data_length: WildPokemons.length
@@ -125,7 +125,7 @@ module.exports = function(app) {
         x = x * d;
         steps += 1;
         var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
-        var lng = x * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
+        var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
         coords.push({
           'lat': lat,
           'lng': lng
@@ -134,7 +134,7 @@ module.exports = function(app) {
       while (2 * y * d < m && steps < stepLimit) {
         y = d + d;
         steps += 1;
-        var lat = y * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
+        var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
         var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
         coords.push({
           'lat': lat,
