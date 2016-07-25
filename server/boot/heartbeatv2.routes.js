@@ -97,7 +97,7 @@ module.exports = function(app) {
   });
 
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
-    coords[{
+    var coords[{
       'lat': startingLat,
       'lng': startingLng
     }];
