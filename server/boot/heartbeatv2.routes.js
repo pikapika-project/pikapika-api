@@ -38,11 +38,12 @@ module.exports = function(app) {
         var stepSize = 0.0015
         var stepLimit = 49
         var qs = [];
-        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
 
         Pokeio.playerInfo = returnedInstance[0];
         Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
         Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
+
+        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
         var lat, lng;
 
         var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
