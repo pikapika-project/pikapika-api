@@ -12,23 +12,6 @@ module.exports = function(app) {
         }
       });
     }
-    console.log('---------BODY---------');
-    console.log(req.body);
-
-    // Wanted body
-    // {
-    //   "username": "poketests42",
-    //   "provider": {
-    //     "name": "google",
-    //     "token": "",
-    //     "expireTime": ""
-    //   },
-    //   "location": {
-    //     "latitude": 20.672233,
-    //     "longitude": -103.368688,
-    //     "altitude": 0
-    //   }
-    // }
 
     var trainer = req.body;
     var Pokeio = new PokemonGO.Pokeio();
