@@ -13,24 +13,10 @@ module.exports = function(app) {
       });
     }
 
-    var trainer = {
-      username: req.body.username,
-      password: req.body.password,
-      location: {
-        type: 'coords',
-        name: req.body.location.name,
-        coords: {
-          latitude:  req.body.location.coords.latitude,
-          longitude: req.body.location.coords.longitude,
-          altitude:  req.body.location.coords.altitude
-        }
-      },
-      provider: req.body.provider
-    };
+    var trainer = req.body;
+    var Pokeio  = new PokemonGO.Pokeio();
 
-    var Pokeio = new PokemonGO.Pokeio();
-
-    Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
+    Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
       if (err) {
         sendError(err, res);
         return false;
@@ -40,13 +26,13 @@ module.exports = function(app) {
       var filter = {
         where: {
           username: trainer.username,
-          provider: trainer.provider
+          provider: trainer.provider.name
         }
       };
       var newTrainer = {
         username:    trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        provider:    trainer.provider,
+        provider:    trainer.provider.name,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
 
