@@ -101,11 +101,11 @@ module.exports = function(app) {
       'lat': startingLat,
       'lng': startingLng
     }];
-    
+
     var steps = 1:
     var x     = 0;
     var y     = 0;
-    var d     = 1:
+    var d     = 1;
     var m     = 1;
     var rlow  = 0.0;
     var rhigh = 0.00005;
