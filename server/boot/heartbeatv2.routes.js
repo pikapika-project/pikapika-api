@@ -97,7 +97,7 @@ module.exports = function(app) {
   });
 
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
-    var coords[{
+    var coords = [{
       'lat': startingLat,
       'lng': startingLng
     }];
@@ -111,7 +111,7 @@ module.exports = function(app) {
         steps += 1;
         var lat = x * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
         var lng = x * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
-        coords.append({
+        coords.push({
           'lat': lat,
           'lng': lat
         });
@@ -121,7 +121,7 @@ module.exports = function(app) {
         steps += 1;
         var lat = y * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
         var lng = y * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
-        coords.append({
+        coords.push({
           'lat': lat,
           'lng': lat
         });
