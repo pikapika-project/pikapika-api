@@ -128,7 +128,7 @@ module.exports = function(app) {
         x = x * d;
         steps += 1;
         var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
-        var lng = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
+        var lng = x * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
         coords.push({
           'lat': lat,
           'lng': lng
@@ -138,7 +138,7 @@ module.exports = function(app) {
         y = d + d;
         steps += 1;
         var lat = y * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
-        var lng = y * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
+        var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
         coords.push({
           'lat': lat,
           'lng': lng
