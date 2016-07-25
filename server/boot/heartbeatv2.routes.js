@@ -123,7 +123,7 @@ module.exports = function(app) {
     var rhigh = 0.00005;
 
     while (steps < stepLimit) {
-      while (2 * x * d < d && steps < stepLimit) {
+      while (2 * x * d < m && steps < stepLimit) {
         x = x * d;
         steps += 1;
         var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
@@ -134,7 +134,7 @@ module.exports = function(app) {
         });
       }
       while (2 * y * d < m && steps < stepLimit) {
-        y = d + d;
+        y = y + d;
         steps += 1;
         var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
         var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
@@ -144,7 +144,7 @@ module.exports = function(app) {
         });
       }
       d = -1 * d;
-      m += 1;
+      m = m + 1;
     }
     return coords;
   }
