@@ -7,7 +7,7 @@ module.exports = function(app) {
     if (!req.body) {
       res.status(404).json({
         error: {
-          statusCode: 404,
+          statusCode:    404,
           statusMessage: "Missing parameters."
         }
       });
@@ -20,9 +20,9 @@ module.exports = function(app) {
         type: 'coords',
         name: req.body.location.name,
         coords: {
-          latitude: req.body.location.coords.latitude,
+          latitude:  req.body.location.coords.latitude,
           longitude: req.body.location.coords.longitude,
-          altitude: req.body.location.coords.altitude
+          altitude:  req.body.location.coords.altitude
         }
       },
       provider: req.body.provider
@@ -37,25 +37,24 @@ module.exports = function(app) {
       }
 
       Trainer = app.models.trainer;
-
-      var newTrainer = {
-        username: trainer.username,
-        accessToken: Pokeio.playerInfo.accessToken,
-        latitude: trainer.location.coords.latitude,
-        longitude: trainer.location.coords.longitude,
-        provider: trainer.provider,
-        apiEndpoint: Pokeio.playerInfo.apiEndpoint
-      }
-
-      Trainer.findOrCreate({
+      var filter = {
         where: {
           username: trainer.username,
           provider: trainer.provider
         }
-      }, newTrainer, function(err, createdTrainer, created) {
+      };
+      var newTrainer = {
+        username:    trainer.username,
+        accessToken: Pokeio.playerInfo.accessToken,
+        provider:    trainer.provider,
+        apiEndpoint: Pokeio.playerInfo.apiEndpoint
+      }
+
+      Trainer.findOrCreate(filter, newTrainer, function(err, createdTrainer, created) {
         if (err) {
           sendError(err, res);
         }
+
         if (!created) {
           createdTrainer.updateAttributes(newTrainer, function(err, instance) {
             if (err) {
@@ -65,13 +64,11 @@ module.exports = function(app) {
         }
       });
 
-      var data = {
-        access_token: session.token,
-        expire_time: session.expire_time
-      };
-
       res.json({
-        data: data
+        data: {
+          access_token: session.token,
+          expire_time:  session.expire_time
+        }
       });
     });
   });
@@ -80,16 +77,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
+      statusCode    = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode = err.response.statusCode || 400;
+      statusCode    = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode: statusCode,
+        statusCode:    statusCode,
         statusMessage: statusMessage
       }
     });
