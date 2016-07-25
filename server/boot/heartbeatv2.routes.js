@@ -45,18 +45,15 @@ module.exports = function(app) {
 
         var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
         var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
-        var lat, lng;
 
         FirstHearbeat().then(hb => {
 
           var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
           console.log(coordsToScan);
           for (var coord in coordsToScan) {
-            lat = coord.lat;
-            lng = coord.lng;
 
-            Pokeio.playerInfo.latitude = lat;
-            Pokeio.playerInfo.longitude = lng;
+            Pokeio.playerInfo.latitude = coord.lat;
+            Pokeio.playerInfo.longitude = coord.lng;
 
             (function(arguments) {
               qs.push(Hearbeat());
