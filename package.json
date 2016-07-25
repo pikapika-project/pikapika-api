@@ -23,7 +23,7 @@
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-datasource-juggler": "^2.39.0",
     "nodemon": "^1.9.2",
-    "pokemon-go-node-api": "git://github.com/WAMP42/Pokemon-GO-node-api.git#feature/NewLogin",
+    "pokemon-go-node-api": "git://github.com/WAMP42/Pokemon-GO-node-api.git",
     "s2geometry-node": "^1.1.0",
     "serve-favicon": "^2.0.1"
   },
