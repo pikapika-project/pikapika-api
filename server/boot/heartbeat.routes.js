@@ -70,9 +70,16 @@ module.exports = function(app) {
                 for (var a = 0; a < resolves[i].cells.length; a++) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                      resolves[i].cells[a].WildPokemon[x].pokemon.PokemonName =
-                        Pokeio.pokemonlist[resolves[i].cells[a].WildPokemon[x].pokemon.PokemonId - 1].name;
-                      WildPokemons.push(resolves[i].cells[a].WildPokemon[x]);
+                      var wp = resolves[i].cells[a].WildPokemon[x];
+
+                      WildPokemons.push({
+                        id:        wp.SpawnPointId,
+                        number:    wp.pokemon.PokemonId,
+                        name:      Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+                        latitude:  wp.Latitude,
+                        longitude: wp.Longitude,
+                        timeleft:  wp.TimeTillHiddenMs
+                      });
                     }
                   }
                 }
