@@ -9,6 +9,7 @@
     "posttest": "nsp check"
   },
   "dependencies": {
+    "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bytebuffer": "^5.0.1",
     "compression": "^1.0.3",
@@ -22,7 +23,7 @@
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-datasource-juggler": "^2.39.0",
     "nodemon": "^1.9.2",
-    "pokemon-go-node-api":"git://github.com/WAMP42/Pokemon-GO-node-api.git#feature/NewLogin",
+    "pokemon-go-node-api": "git://github.com/WAMP42/Pokemon-GO-node-api.git#feature/NewLogin",
     "s2geometry-node": "^1.1.0",
     "serve-favicon": "^2.0.1"
   },

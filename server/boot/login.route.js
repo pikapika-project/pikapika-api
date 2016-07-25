@@ -12,6 +12,9 @@ module.exports = function(app) {
         }
       });
     }
+    console.log('---------BODY---------');
+    console.log(req.body);
+
     // Wanted body
     // {
     //   "username": "poketests42",
