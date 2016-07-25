@@ -101,8 +101,13 @@ module.exports = function(app) {
       'lat': startingLat,
       'lng': startingLng
     }];
-    var steps, x, y, d, m = 1, 0, 0, 1, 1;
-    var rlow = 0.0;
+    
+    var steps = 1:
+    var x     = 0;
+    var y     = 0;
+    var d     = 1:
+    var m     = 1;
+    var rlow  = 0.0;
     var rhigh = 0.00005;
 
     while (steps < stepLimit) {
