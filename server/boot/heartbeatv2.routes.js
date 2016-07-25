@@ -49,17 +49,16 @@ module.exports = function(app) {
         FirstHearbeat().then(hb => {
 
           var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
-          console.log(coordsToScan);
-          for (var coord in coordsToScan) {
 
-            Pokeio.playerInfo.latitude = coord.lat;
-            Pokeio.playerInfo.longitude = coord.lng;
+          for (var i = 0; i < coordsToScan.length; i++) {
+            Pokeio.playerInfo.latitude  = parseFloat(coordsToScan[i].lat);
+            Pokeio.playerInfo.longitude = parseFloat(coordsToScan[i].lng);
 
             (function(arguments) {
               qs.push(Hearbeat());
             })();
           }
-
+          
         }).catch(err => {
           if (err) {
             sendError(err, res);
