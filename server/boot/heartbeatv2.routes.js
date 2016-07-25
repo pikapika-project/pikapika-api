@@ -43,22 +43,33 @@ module.exports = function(app) {
         Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
         Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
 
+        var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
         var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
         var lat, lng;
 
-        var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
-        console.log(coordsToScan);
-        for (var coord in coordsToScan) {
-          lat = coord['lat'];
-          lng = coord['lng'];
+        FirstHearbeat().then(hb => {
 
-          Pokeio.playerInfo.latitude = lat;
-          Pokeio.playerInfo.longitude = lng;
+          var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
+          console.log(coordsToScan);
+          for (var coord in coordsToScan) {
+            lat = coord['lat'];
+            lng = coord['lng'];
 
-          (function(arguments) {
-            qs.push(Hearbeat());
-          })();
-        }
+            Pokeio.playerInfo.latitude = lat;
+            Pokeio.playerInfo.longitude = lng;
+
+            (function(arguments) {
+              qs.push(Hearbeat());
+            })();
+          }
+
+        }).catch(err => {
+          if (err) {
+            sendError(err, res);
+            return false;
+          }
+        });
+
         Promise.all(qs)
           .then(function(resolves) {
             for (var i = 0; i < resolves.length; i++) {
@@ -70,16 +81,13 @@ module.exports = function(app) {
 
                     var now = new Date();
                     WildPokemons.push({
-                      id: wp.SpawnPointId,
-                      number: wp.pokemon.PokemonId,
-                      name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                      position: new GeoPoint({
-                        lat: wp.Latitude,
-                        lng: wp.Longitude
-                      }),
-                      timeleft: wp.TimeTillHiddenMs,
+                      id       : wp.SpawnPointId,
+                      number   : wp.pokemon.PokemonId,
+                      name     : Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+                      position : new GeoPoint({lat: wp.Latitude,lng: wp.Longitude}),
+                      timeleft : wp.TimeTillHiddenMs,
                       createdAt: now,
-                      expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
+                      expireAt : new Date(now.getTime() + wp.TimeTillHiddenMs)
                     });
                   }
                 }
@@ -108,11 +116,11 @@ module.exports = function(app) {
     }];
 
     var steps = 1;
-    var x     = 0;
-    var y     = 0;
-    var d     = 1;
-    var m     = 1;
-    var rlow  = 0.0;
+    var x = 0;
+    var y = 0;
+    var d = 1;
+    var m = 1;
+    var rlow = 0.0;
     var rhigh = 0.00005;
 
     while (steps < stepLimit) {
