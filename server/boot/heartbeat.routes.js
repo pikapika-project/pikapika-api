@@ -78,8 +78,7 @@ module.exports = function(app) {
                         id:        wp.SpawnPointId,
                         number:    wp.pokemon.PokemonId,
                         name:      Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                        latitude:  wp.Latitude,
-                        longitude: wp.Longitude,
+                        position:  new GeoPoint({lat: wp.Latitude, lng: wp.Longitude}),
                         timeleft:  wp.TimeTillHiddenMs,
                         createdAt: now,
                         expireAt:  new Date(now.getTime() + wp.TimeTillHiddenMs)
