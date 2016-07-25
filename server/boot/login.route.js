@@ -69,8 +69,8 @@ module.exports = function(app) {
 
       res.json({
         data: {
-          access_token: session.token,
-          expire_time: session.expire_time
+          access_token: session.accessToken,
+          expire_time: session.expireTime
         }
       });
     });
