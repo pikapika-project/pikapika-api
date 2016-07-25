@@ -7,30 +7,16 @@ module.exports = function(app) {
     if (!req.body) {
       res.status(404).json({
         error: {
-          statusCode:    404,
+          statusCode   : 404,
           statusMessage: "Missing parameters."
         }
       });
     }
 
-    var trainer = {
-      username: req.body.username,
-      password: req.body.password,
-      location: {
-        type: 'coords',
-        name: req.body.location.name,
-        coords: {
-          latitude:  req.body.location.coords.latitude,
-          longitude: req.body.location.coords.longitude,
-          altitude:  req.body.location.coords.altitude
-        }
-      },
-      provider: req.body.provider
-    };
+    var trainer = req.body;
+    var Pokeio  = new PokemonGO.Pokeio();
 
-    var Pokeio = new PokemonGO.Pokeio();
-
-    Pokeio.init(trainer.username, trainer.password, trainer.location, trainer.provider, function(err, session) {
+    Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
       if (err) {
         sendError(err, res);
         return false;
@@ -40,13 +26,13 @@ module.exports = function(app) {
       var filter = {
         where: {
           username: trainer.username,
-          provider: trainer.provider
+          provider: trainer.provider.name
         }
       };
       var newTrainer = {
-        username:    trainer.username,
+        username   : trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        provider:    trainer.provider,
+        provider   : trainer.provider.name,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
 
@@ -66,8 +52,8 @@ module.exports = function(app) {
 
       res.json({
         data: {
-          access_token: session.token,
-          expire_time:  session.expire_time
+          access_token: session.accessToken,
+          expire_time : session.expireTime
         }
       });
     });
@@ -77,16 +63,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode    = err.statusCode || 400;
+      statusCode = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode    = err.response.statusCode || 400;
+      statusCode = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode:    statusCode,
+        statusCode: statusCode,
         statusMessage: statusMessage
       }
     });
