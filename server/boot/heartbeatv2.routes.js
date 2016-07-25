@@ -63,6 +63,7 @@ module.exports = function(app) {
                 if (resolves[i].cells[a].WildPokemon.length > 0) {
                   for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                     var wp = resolves[i].cells[a].WildPokemon[x];
+                    console.log(resolves[i].cells[a].WildPokemon[x]);
 
                     var now = new Date();
                     WildPokemons.push({
