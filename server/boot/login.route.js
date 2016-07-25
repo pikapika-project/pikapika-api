@@ -7,14 +7,14 @@ module.exports = function(app) {
     if (!req.body) {
       res.status(404).json({
         error: {
-          statusCode: 404,
+          statusCode   : 404,
           statusMessage: "Missing parameters."
         }
       });
     }
 
     var trainer = req.body;
-    var Pokeio = new PokemonGO.Pokeio();
+    var Pokeio  = new PokemonGO.Pokeio();
 
     Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
       if (err) {
@@ -30,9 +30,9 @@ module.exports = function(app) {
         }
       };
       var newTrainer = {
-        username: trainer.username,
+        username   : trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        provider: trainer.provider.name,
+        provider   : trainer.provider.name,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
 
@@ -53,7 +53,7 @@ module.exports = function(app) {
       res.json({
         data: {
           access_token: session.accessToken,
-          expire_time: session.expireTime
+          expire_time : session.expireTime
         }
       });
     });
