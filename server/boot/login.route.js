@@ -4,6 +4,8 @@ module.exports = function(app) {
 
   app.post('/trainers/login', function(req, res) {
 
+    console.log("[i] Login from " + req.headers['cf-ipcountry'] + " ("+ req.headers['x-forwarded-for'] + ")");
+
     if (!req.body) {
       res.status(404).json({
         error: {
