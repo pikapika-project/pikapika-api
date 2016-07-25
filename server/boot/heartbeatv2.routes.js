@@ -10,7 +10,7 @@ module.exports = function(app) {
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
-          statusCode:    404,
+          statusCode: 404,
           statusMessage: "Missing parameters."
         }
       });
@@ -29,26 +29,26 @@ module.exports = function(app) {
       }
 
       if (returnedInstance[0]) {
-        var WildPokemons   = [];
+        var WildPokemons = [];
         var NearbyPokemons = [];
-        var MapPokemons    = [];
-        var cells          = [];
-        var Pokeio         = new PokemonGO.Pokeio();
+        var MapPokemons = [];
+        var cells = [];
+        var Pokeio = new PokemonGO.Pokeio();
 
-        Pokeio.playerInfo           = returnedInstance[0];
-        Pokeio.playerInfo.latitude  = parseFloat(req.params.lat);
+        Pokeio.playerInfo = returnedInstance[0];
+        Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
         Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
 
         var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
-        var Hearbeat      = Promise.promisify(Pokeio.Heartbeat);
+        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
 
         FirstHearbeat().then(hb => {
           var qs = [];
 
           for (var i = 0; i < hb.cells.length; i++) {
-            var cellId   = new s2.S2CellId(hb.cells[i].S2CellId.toString());
+            var cellId = new s2.S2CellId(hb.cells[i].S2CellId.toString());
             var thisCell = new s2.S2Cell(cellId);
-            var latLng   = new s2.S2LatLng(thisCell.getCenter()).toString().split(',');
+            var latLng = new s2.S2LatLng(thisCell.getCenter()).toString().split(',');
 
             cells.push({
               lat: latLng[0],
@@ -57,7 +57,7 @@ module.exports = function(app) {
           }
 
           for (var a = 0; a < cells.length; a++) {
-            Pokeio.playerInfo.latitude  = parseFloat(cells[a].lat);
+            Pokeio.playerInfo.latitude = parseFloat(cells[a].lat);
             Pokeio.playerInfo.longitude = parseFloat(cells[a].lng);
 
             (function(arguments) {
@@ -75,22 +75,25 @@ module.exports = function(app) {
 
                       var now = new Date();
                       WildPokemons.push({
-                        id:        wp.SpawnPointId,
-                        number:    wp.pokemon.PokemonId,
-                        name:      Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                        position:  new GeoPoint({lat: wp.Latitude, lng: wp.Longitude}),
-                        timeleft:  wp.TimeTillHiddenMs,
+                        id: wp.SpawnPointId,
+                        number: wp.pokemon.PokemonId,
+                        name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+                        position: new GeoPoint({
+                          lat: wp.Latitude,
+                          lng: wp.Longitude
+                        }),
+                        timeleft: wp.TimeTillHiddenMs,
                         createdAt: now,
-                        expireAt:  new Date(now.getTime() + wp.TimeTillHiddenMs)
+                        expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
                       });
                     }
                   }
                 }
               }
 
-              app.models.pokemon.create(WildPokemons, function (err, obj) {
+              app.models.pokemon.create(WildPokemons, function(err, obj) {
                 res.json({
-                  data:        WildPokemons,
+                  data: WildPokemons,
                   data_length: WildPokemons.length
                 });
               });
@@ -105,20 +108,47 @@ module.exports = function(app) {
     });
   });
 
+  function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
+    coords[{'lat': startingLat, 'lng': startingLng}];
+    steps, x, y, d, m = 1, 0, 0, 1, 1;
+    rlow = 0.0;
+    rhigh = 0.00005;
+
+    while (steps < stepLimit) {
+      while (2 * x * d < d && steps < stepLimit) {
+        x = x * d;
+        steps += 1;
+        var lat = x * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
+        var lng = x * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
+        coords.append({'lat': lat, 'lng': lat});
+      }
+      while (2 * y * d < m && steps < stepLimit) {
+        y = d + d;
+        steps += 1;
+        var lat = y * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
+        var lng = y * stepSize + startingLat * (Math.random() * (rlow - rhigh) + min);
+        coords.append({'lat': lat, 'lng': lat});
+      }
+      d = -1 * d;
+      m += 1;
+    }
+    return coords;
+  }
+
   function sendError(err, res) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode    = err.statusCode || 400;
+      statusCode = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode    = err.response.statusCode || 400;
+      statusCode = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode:    statusCode,
+        statusCode: statusCode,
         statusMessage: statusMessage
       }
     });
