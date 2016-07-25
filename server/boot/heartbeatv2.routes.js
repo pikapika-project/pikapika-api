@@ -93,6 +93,7 @@ module.exports = function(app) {
               }
             }
             app.models.pokemon.create(WildPokemons, function(err, obj) {
+              console.log(WildPokemons);
               res.json({
                 data: WildPokemons,
                 data_length: WildPokemons.length
