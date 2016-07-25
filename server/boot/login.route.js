@@ -7,14 +7,28 @@ module.exports = function(app) {
     if (!req.body) {
       res.status(404).json({
         error: {
-          statusCode:    404,
+          statusCode: 404,
           statusMessage: "Missing parameters."
         }
       });
     }
+    // Wanted body
+    // {
+    //   "username": "poketests42",
+    //   "provider": {
+    //     "name": "google",
+    //     "token": "",
+    //     "expireTime": ""
+    //   },
+    //   "location": {
+    //     "latitude": 20.672233,
+    //     "longitude": -103.368688,
+    //     "altitude": 0
+    //   }
+    // }
 
     var trainer = req.body;
-    var Pokeio  = new PokemonGO.Pokeio();
+    var Pokeio = new PokemonGO.Pokeio();
 
     Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
       if (err) {
@@ -30,9 +44,9 @@ module.exports = function(app) {
         }
       };
       var newTrainer = {
-        username:    trainer.username,
+        username: trainer.username,
         accessToken: Pokeio.playerInfo.accessToken,
-        provider:    trainer.provider.name,
+        provider: trainer.provider.name,
         apiEndpoint: Pokeio.playerInfo.apiEndpoint
       }
 
@@ -53,7 +67,7 @@ module.exports = function(app) {
       res.json({
         data: {
           access_token: session.token,
-          expire_time:  session.expire_time
+          expire_time: session.expire_time
         }
       });
     });
@@ -63,16 +77,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode    = err.statusCode || 400;
+      statusCode = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode    = err.response.statusCode || 400;
+      statusCode = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode:    statusCode,
+        statusCode: statusCode,
         statusMessage: statusMessage
       }
     });
