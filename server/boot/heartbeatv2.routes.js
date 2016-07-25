@@ -58,6 +58,45 @@ module.exports = function(app) {
               qs.push(Hearbeat());
             })();
           }
+          Promise.all(qs)
+            .then(function(resolves) {
+              for (var i = 0; i < resolves.length; i++) {
+                for (var a = 0; a < resolves[i].cells.length; a++) {
+                  if (resolves[i].cells[a].WildPokemon.length > 0) {
+                    for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
+                      var wp = resolves[i].cells[a].WildPokemon[x];
+                      console.log(resolves[i].cells[a].WildPokemon[x]);
+
+                      var now = new Date();
+                      WildPokemons.push({
+                        id: wp.SpawnPointId,
+                        number: wp.pokemon.PokemonId,
+                        name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+                        position: new GeoPoint({
+                          lat: wp.Latitude,
+                          lng: wp.Longitude
+                        }),
+                        timeleft: wp.TimeTillHiddenMs,
+                        createdAt: now,
+                        expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
+                      });
+                    }
+                  }
+                }
+              }
+              app.models.pokemon.create(WildPokemons, function(err, obj) {
+                console.log(WildPokemons);
+                res.json({
+                  data: WildPokemons,
+                  data_length: WildPokemons.length
+                });
+              });
+            }).catch(err => {
+              if (err) {
+                sendError(err, res);
+                return false;
+              }
+            });
 
         }).catch(err => {
           if (err) {
@@ -65,46 +104,6 @@ module.exports = function(app) {
             return false;
           }
         });
-
-        Promise.all(qs)
-          .then(function(resolves) {
-            for (var i = 0; i < resolves.length; i++) {
-              for (var a = 0; a < resolves[i].cells.length; a++) {
-                if (resolves[i].cells[a].WildPokemon.length > 0) {
-                  for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                    var wp = resolves[i].cells[a].WildPokemon[x];
-                    console.log(resolves[i].cells[a].WildPokemon[x]);
-
-                    var now = new Date();
-                    WildPokemons.push({
-                      id: wp.SpawnPointId,
-                      number: wp.pokemon.PokemonId,
-                      name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                      position: new GeoPoint({
-                        lat: wp.Latitude,
-                        lng: wp.Longitude
-                      }),
-                      timeleft: wp.TimeTillHiddenMs,
-                      createdAt: now,
-                      expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
-                    });
-                  }
-                }
-              }
-            }
-            app.models.pokemon.create(WildPokemons, function(err, obj) {
-              console.log(WildPokemons);
-              res.json({
-                data: WildPokemons,
-                data_length: WildPokemons.length
-              });
-            });
-          }).catch(err => {
-            if (err) {
-              sendError(err, res);
-              return false;
-            }
-          });
       }
     });
   });
