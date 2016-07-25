@@ -35,5 +35,9 @@
   "trainer": {
     "dataSource": "mongo",
     "public": true
+  },
+  "pokemon": {
+    "dataSource": "mongo",
+    "public": true
   }
 }
