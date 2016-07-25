@@ -58,7 +58,7 @@ module.exports = function(app) {
               qs.push(Hearbeat());
             })();
           }
-          
+
         }).catch(err => {
           if (err) {
             sendError(err, res);
@@ -68,6 +68,7 @@ module.exports = function(app) {
 
         Promise.all(qs)
           .then(function(resolves) {
+            console.log(resolves);
             for (var i = 0; i < resolves.length; i++) {
               for (var a = 0; a < resolves[i].cells.length; a++) {
                 if (resolves[i].cells[a].WildPokemon.length > 0) {
@@ -90,6 +91,7 @@ module.exports = function(app) {
               }
             }
             app.models.pokemon.create(WildPokemons, function(err, obj) {
+              console.log(WildPokemons);
               res.json({
                 data: WildPokemons,
                 data_length: WildPokemons.length
