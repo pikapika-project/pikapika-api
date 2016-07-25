@@ -52,15 +52,15 @@ module.exports = function(app) {
           var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
           console.log(coordsToScan);
           for (var coord in coordsToScan) {
-            // lat = coord.lat;
-            // lng = coord.lng;
-            //
-            // Pokeio.playerInfo.latitude = lat;
-            // Pokeio.playerInfo.longitude = lng;
-            //
-            // (function(arguments) {
-            //   qs.push(Hearbeat());
-            // })();
+            lat = coord.lat;
+            lng = coord.lng;
+
+            Pokeio.playerInfo.latitude = lat;
+            Pokeio.playerInfo.longitude = lng;
+
+            (function(arguments) {
+              qs.push(Hearbeat());
+            })();
           }
 
         }).catch(err => {
