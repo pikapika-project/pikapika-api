@@ -102,7 +102,7 @@ module.exports = function(app) {
       'lng': startingLng
     }];
 
-    var steps = 1:
+    var steps = 1;
     var x     = 0;
     var y     = 0;
     var d     = 1;
