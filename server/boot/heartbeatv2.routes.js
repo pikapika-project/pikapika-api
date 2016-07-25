@@ -47,13 +47,13 @@ app.get('/pokemons/:lat/:lng/heartbeat/v2', function(req, res, next) {
         for (var coord in coordsToScan) {
           lat = coord['lat'];
           lng = coord['lng'];
+
           Pokeio.playerInfo.latitude = lat;
           Pokeio.playerInfo.longitude = lng;
 
           (function(arguments) {
             qs.push(Hearbeat());
           })();
-
         }
         Promise.all(qs)
           .then(function(resolves) {
