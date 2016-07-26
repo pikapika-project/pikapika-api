@@ -61,6 +61,7 @@ module.exports = function(app) {
           }
           var wp;
           var now;
+          var prev;
           Promise.all(qs)
             .then(function(resolves) {
               for (var i = 0; i < resolves.length; i++) {
@@ -68,8 +69,8 @@ module.exports = function(app) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                       wp = resolves[i].cells[a].WildPokemon[x];
-                      now = new Date();
-                      if (_.findWhere(WildPokemons, wp) == undefined) {
+                      if (checkIfExist(WildPokemons, wp) === false) {
+                        now = new Date();
                         WildPokemons.push({
                           id: wp.SpawnPointId,
                           number: wp.pokemon.PokemonId,
@@ -83,7 +84,6 @@ module.exports = function(app) {
                           expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
                         });
                       }
-
                     }
                   }
                 }
@@ -110,6 +110,18 @@ module.exports = function(app) {
       }
     });
   });
+
+  function checkIfExist(array, newObject) {
+    if (array.length === 0) {
+      return false
+    }
+    for (var i = 0; i < array.length; i++) {
+      if (array[i].position.lat == newObject.Latitude && array[i].position.lng == newObject.Longitude) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
     var coords = [{
