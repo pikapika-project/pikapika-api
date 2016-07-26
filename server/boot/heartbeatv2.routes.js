@@ -58,6 +58,8 @@ module.exports = function(app) {
               qs.push(Hearbeat());
             })();
           }
+          var wp;
+          var now;
           Promise.all(qs)
             .then(function(resolves) {
               for (var i = 0; i < resolves.length; i++) {
@@ -65,8 +67,8 @@ module.exports = function(app) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                       console.log(resolves[i].cells[a].WildPokemon[x]);
-                      var wp = resolves[i].cells[a].WildPokemon[x];
-                      var now = new Date();
+                      wp = resolves[i].cells[a].WildPokemon[x];
+                      now = new Date();
                       WildPokemons.push({
                         id: wp.SpawnPointId,
                         number: wp.pokemon.PokemonId,
