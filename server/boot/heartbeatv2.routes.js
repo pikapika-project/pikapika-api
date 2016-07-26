@@ -29,38 +29,33 @@ module.exports = function(app) {
       }
 
       if (returnedInstance[0]) {
-        var WildPokemons = [];
-        var NearbyPokemons = [];
-        var MapPokemons = [];
-        var cells = [];
 
-        var Pokeio = new PokemonGO.Pokeio();
-        var stepSize = 0.0015;
-        var stepLimit = 49;
-        var qs = [];
+        var Pokeio    = new PokemonGO.Pokeio();
+        var pokemons  = [];
+        var qs        = [];
+        var stepSize  = 0.0015;
+        var stepLimit = 50;
 
-        Pokeio.playerInfo = returnedInstance[0];
-        Pokeio.playerInfo.latitude = parseFloat(req.params.lat);
+        Pokeio.playerInfo           = returnedInstance[0];
+        Pokeio.playerInfo.latitude  = parseFloat(req.params.lat);
         Pokeio.playerInfo.longitude = parseFloat(req.params.lng);
 
         var FirstHearbeat = Promise.promisify(Pokeio.Heartbeat);
-        var Hearbeat = Promise.promisify(Pokeio.Heartbeat);
+        var Hearbeat      = Promise.promisify(Pokeio.Heartbeat);
 
         FirstHearbeat().then(hb => {
 
+          var p, now;
           var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
 
           for (var i = 0; i < coordsToScan.length; i++) {
-            Pokeio.playerInfo.latitude = parseFloat(coordsToScan[i].lat);
+            Pokeio.playerInfo.latitude  = parseFloat(coordsToScan[i].lat);
             Pokeio.playerInfo.longitude = parseFloat(coordsToScan[i].lng);
 
             (function(arguments) {
               qs.push(Hearbeat());
             })();
           }
-          var wp;
-          var now;
-          var prev;
 
           Promise.all(qs)
             .then(function(resolves) {
@@ -68,34 +63,32 @@ module.exports = function(app) {
                 for (var a = 0; a < resolves[i].cells.length; a++) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                      wp = resolves[i].cells[a].WildPokemon[x];
+                      p = resolves[i].cells[a].WildPokemon[x];
 
-                      var found = WildPokemons.some(function (p) {
-                        return p.id === wp.SpawnPointId;
-                      });
-                      if (!found) {
+                      if (!isExist(pokemons, p)) {
                         now = new Date();
-                        WildPokemons.push({
-                          id: wp.SpawnPointId,
-                          number: wp.pokemon.PokemonId,
-                          name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+
+                        pokemons.push({
+                          id:       p.SpawnPointId,
+                          number:   p.pokemon.PokemonId,
+                          name:     Pokeio.pokemonlist[p.pokemon.PokemonId - 1].name,
                           position: new GeoPoint({
-                            lat: wp.Latitude,
-                            lng: wp.Longitude
+                            lat: p.Latitude,
+                            lng: p.Longitude
                           }),
-                          timeleft: wp.TimeTillHiddenMs,
+                          timeleft:  p.TimeTillHiddenMs,
                           createdAt: now,
-                          expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
+                          expireAt:  new Date(now.getTime() + p.TimeTillHiddenMs)
                         });
                       }
                     }
                   }
                 }
               }
-              app.models.pokemon.create(WildPokemons, function(err, obj) {
+              app.models.pokemon.create(pokemons, function(err, obj) {
                 res.json({
-                  data: WildPokemons,
-                  data_length: WildPokemons.length
+                  data:        pokemons,
+                  data_length: pokemons.length
                 });
               });
             }).catch(err => {
@@ -115,6 +108,12 @@ module.exports = function(app) {
     });
   });
 
+  function isExist(pokemons, pokemon) {
+    return pokemons.some(function (p) {
+      return p.id === pokemon.SpawnPointId;
+    });
+  }
+
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
     var coords = [{
       'lat': startingLat,
@@ -122,31 +121,34 @@ module.exports = function(app) {
     }];
 
     var steps = 1;
-    var x = 0;
-    var y = 0;
-    var d = 1;
-    var m = 1;
-    var rlow = 0.0;
+    var x     = 0;
+    var y     = 0;
+    var d     = 1;
+    var m     = 1;
+    var rlow  = 0.0;
     var rhigh = 0.0005;
 
     while (steps < stepLimit) {
       while (2 * x * d < m && steps < stepLimit) {
         x = x + d;
         steps += 1;
-        var random = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        var random  = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
         var random2 = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
-        var lat = x * stepSize + startingLat + random;
-        var lng = y * stepSize + startingLng + random2;
+        var lat     = x * stepSize + startingLat + random;
+        var lng     = y * stepSize + startingLng + random2;
+
         coords.push({
           'lat': lat,
           'lng': lng
         });
       }
+
       while (2 * y * d < m && steps < stepLimit) {
         y = y + d;
         steps += 1;
         var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
         var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
+
         coords.push({
           'lat': lat,
           'lng': lng
@@ -155,6 +157,7 @@ module.exports = function(app) {
       d = -1 * d;
       m = m + 1;
     }
+
     return coords;
   }
 
@@ -162,16 +165,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
+      statusCode    = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode = err.response.statusCode || 400;
+      statusCode    = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode: statusCode,
+        statusCode:    statusCode,
         statusMessage: statusMessage
       }
     });
