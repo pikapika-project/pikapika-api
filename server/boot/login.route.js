@@ -1,4 +1,5 @@
 var PokemonGO = require('pokemon-go-node-api');
+var Promise = require("bluebird");
 
 module.exports = function(app) {
 
@@ -7,33 +8,31 @@ module.exports = function(app) {
     if (!req.body) {
       res.status(404).json({
         error: {
-          statusCode   : 404,
+          statusCode: 404,
           statusMessage: "Missing parameters."
         }
       });
     }
 
     var trainer = req.body;
-    var Pokeio  = new PokemonGO.Pokeio();
+    var Pokeio = new PokemonGO.Pokeio();
+    var PokemonGoInit = Promise.promisify(Pokeio.init);
+    Trainer = app.models.trainer;
 
-    Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
-      if (err) {
-        sendError(err, res);
-        return false;
-      }
+    PokemonGoInit().then(session => {
 
-      Trainer = app.models.trainer;
       var filter = {
         where: {
           username: trainer.username,
           provider: trainer.provider.name
         }
       };
+
       var newTrainer = {
-        username   : trainer.username,
-        accessToken: Pokeio.playerInfo.accessToken,
-        provider   : trainer.provider.name,
-        apiEndpoint: Pokeio.playerInfo.apiEndpoint
+        username: trainer.username,
+        accessToken: session.accessToken,
+        provider: trainer.provider.name,
+        apiEndpoint: session.apiEndpoint
       }
 
       Trainer.findOrCreate(filter, newTrainer, function(err, createdTrainer, created) {
@@ -53,10 +52,16 @@ module.exports = function(app) {
       res.json({
         data: {
           access_token: session.accessToken,
-          expire_time : session.expireTime
+          expire_time: session.tokenExpireTime
         }
       });
+
+    }).catch(err => {
+      if (err) {
+        sendError(err, res);
+      }
     });
+
   });
 
   function sendError(err, res) {
