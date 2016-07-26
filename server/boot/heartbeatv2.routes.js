@@ -1,5 +1,6 @@
 var GeoPoint = require('loopback').GeoPoint;
 var PokemonGO = require('pokemon-go-node-api');
+var _ = require('underscore');
 var Promise = require("bluebird");
 const s2 = require('s2geometry-node');
 
@@ -66,21 +67,22 @@ module.exports = function(app) {
                 for (var a = 0; a < resolves[i].cells.length; a++) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                      console.log(resolves[i].cells[a].WildPokemon[x]);
                       wp = resolves[i].cells[a].WildPokemon[x];
                       now = new Date();
-                      WildPokemons.push({
-                        id: wp.SpawnPointId,
-                        number: wp.pokemon.PokemonId,
-                        name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                        position: new GeoPoint({
-                          lat: wp.Latitude,
-                          lng: wp.Longitude
-                        }),
-                        timeleft: wp.TimeTillHiddenMs,
-                        createdAt: now,
-                        expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
-                      });
+                      if (_.findWhere(WildPokemons, wp) == null) {
+                        WildPokemons.push({
+                          id: wp.SpawnPointId,
+                          number: wp.pokemon.PokemonId,
+                          name: Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
+                          position: new GeoPoint({
+                            lat: wp.Latitude,
+                            lng: wp.Longitude
+                          }),
+                          timeleft: wp.TimeTillHiddenMs,
+                          createdAt: now,
+                          expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
+                        });
+                      }
                     }
                   }
                 }
