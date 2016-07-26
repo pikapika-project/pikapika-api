@@ -5,12 +5,12 @@ const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
 
-  app.get('/pokemons/:lat/:lng/heartbeat/v2', function(req, res, next) {
+  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
         error: {
-          statusCode:    404,
+          statusCode: 404,
           statusMessage: "Missing parameters."
         }
       });
@@ -29,11 +29,12 @@ module.exports = function(app) {
       }
 
       if (returnedInstance[0]) {
-        var WildPokemons   = [];
-        var NearbyPokemons = [];
-        var MapPokemons    = [];
-        var cells          = [];
-        var Pokeio         = new PokemonGO.Pokeio();
+
+        var Pokeio    = new PokemonGO.Pokeio();
+        var pokemons  = [];
+        var qs        = [];
+        var stepSize  = 0.0015;
+        var stepLimit = 50;
 
         Pokeio.playerInfo           = returnedInstance[0];
         Pokeio.playerInfo.latitude  = parseFloat(req.params.lat);
@@ -43,22 +44,13 @@ module.exports = function(app) {
         var Hearbeat      = Promise.promisify(Pokeio.Heartbeat);
 
         FirstHearbeat().then(hb => {
-          var qs = [];
 
-          for (var i = 0; i < hb.cells.length; i++) {
-            var cellId   = new s2.S2CellId(hb.cells[i].S2CellId.toString());
-            var thisCell = new s2.S2Cell(cellId);
-            var latLng   = new s2.S2LatLng(thisCell.getCenter()).toString().split(',');
+          var p, now;
+          var coordsToScan = generateSpiral(Pokeio.playerInfo.latitude, Pokeio.playerInfo.longitude, stepSize, stepLimit);
 
-            cells.push({
-              lat: latLng[0],
-              lng: latLng[1]
-            });
-          }
-
-          for (var a = 0; a < cells.length; a++) {
-            Pokeio.playerInfo.latitude  = parseFloat(cells[a].lat);
-            Pokeio.playerInfo.longitude = parseFloat(cells[a].lng);
+          for (var i = 0; i < coordsToScan.length; i++) {
+            Pokeio.playerInfo.latitude  = parseFloat(coordsToScan[i].lat);
+            Pokeio.playerInfo.longitude = parseFloat(coordsToScan[i].lng);
 
             (function(arguments) {
               qs.push(Hearbeat());
@@ -71,30 +63,41 @@ module.exports = function(app) {
                 for (var a = 0; a < resolves[i].cells.length; a++) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                      var wp = resolves[i].cells[a].WildPokemon[x];
+                      p = resolves[i].cells[a].WildPokemon[x];
 
-                      var now = new Date();
-                      WildPokemons.push({
-                        id:        wp.SpawnPointId,
-                        number:    wp.pokemon.PokemonId,
-                        name:      Pokeio.pokemonlist[wp.pokemon.PokemonId - 1].name,
-                        position:  new GeoPoint({lat: wp.Latitude, lng: wp.Longitude}),
-                        timeleft:  wp.TimeTillHiddenMs,
-                        createdAt: now,
-                        expireAt:  new Date(now.getTime() + wp.TimeTillHiddenMs)
-                      });
+                      if (!isExist(pokemons, p)) {
+                        now = new Date();
+
+                        pokemons.push({
+                          id:       p.SpawnPointId,
+                          number:   p.pokemon.PokemonId,
+                          name:     Pokeio.pokemonlist[p.pokemon.PokemonId - 1].name,
+                          position: new GeoPoint({
+                            lat: p.Latitude,
+                            lng: p.Longitude
+                          }),
+                          timeleft:  p.TimeTillHiddenMs,
+                          createdAt: now,
+                          expireAt:  new Date(now.getTime() + p.TimeTillHiddenMs)
+                        });
+                      }
                     }
                   }
                 }
               }
-
-              app.models.pokemon.create(WildPokemons, function (err, obj) {
+              app.models.pokemon.create(pokemons, function(err, obj) {
                 res.json({
-                  data:        WildPokemons,
-                  data_length: WildPokemons.length
+                  data:        pokemons,
+                  data_length: pokemons.length
                 });
               });
+            }).catch(err => {
+              if (err) {
+                sendError(err, res);
+                return false;
+              }
             });
+
         }).catch(err => {
           if (err) {
             sendError(err, res);
@@ -104,6 +107,59 @@ module.exports = function(app) {
       }
     });
   });
+
+  function isExist(pokemons, pokemon) {
+    return pokemons.some(function (p) {
+      return p.id === pokemon.SpawnPointId;
+    });
+  }
+
+  function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
+    var coords = [{
+      'lat': startingLat,
+      'lng': startingLng
+    }];
+
+    var steps = 1;
+    var x     = 0;
+    var y     = 0;
+    var d     = 1;
+    var m     = 1;
+    var rlow  = 0.0;
+    var rhigh = 0.0005;
+
+    while (steps < stepLimit) {
+      while (2 * x * d < m && steps < stepLimit) {
+        x = x + d;
+        steps += 1;
+        var random  = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        var random2 = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        var lat     = x * stepSize + startingLat + random;
+        var lng     = y * stepSize + startingLng + random2;
+
+        coords.push({
+          'lat': lat,
+          'lng': lng
+        });
+      }
+
+      while (2 * y * d < m && steps < stepLimit) {
+        y = y + d;
+        steps += 1;
+        var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
+        var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
+
+        coords.push({
+          'lat': lat,
+          'lng': lng
+        });
+      }
+      d = -1 * d;
+      m = m + 1;
+    }
+
+    return coords;
+  }
 
   function sendError(err, res) {
     var statusCode, statusMessage;
