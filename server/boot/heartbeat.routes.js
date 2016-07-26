@@ -5,7 +5,7 @@ const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
 
-  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
+  app.get('/pokemons/:lat/:lng/heartbeat/v2', function(req, res, next) {
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({

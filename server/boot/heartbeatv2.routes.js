@@ -1,12 +1,11 @@
 var GeoPoint = require('loopback').GeoPoint;
 var PokemonGO = require('pokemon-go-node-api');
-var _ = require('underscore');
 var Promise = require("bluebird");
 const s2 = require('s2geometry-node');
 
 module.exports = function(app) {
 
-  app.get('/pokemons/:lat/:lng/heartbeat/v2', function(req, res, next) {
+  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
@@ -62,6 +61,7 @@ module.exports = function(app) {
           var wp;
           var now;
           var prev;
+
           Promise.all(qs)
             .then(function(resolves) {
               for (var i = 0; i < resolves.length; i++) {
@@ -69,7 +69,11 @@ module.exports = function(app) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                       wp = resolves[i].cells[a].WildPokemon[x];
-                      if (checkIfExist(WildPokemons, wp) === false) {
+
+                      var found = WildPokemons.some(function (p) {
+                        return p.id === wp.SpawnPointId;
+                      });
+                      if (!found) {
                         now = new Date();
                         WildPokemons.push({
                           id: wp.SpawnPointId,
@@ -110,18 +114,6 @@ module.exports = function(app) {
       }
     });
   });
-
-  function checkIfExist(array, newObject) {
-    if (array.length === 0) {
-      return false
-    }
-    for (var i = 0; i < array.length; i++) {
-      if (array[i].position.lat == newObject.Latitude && array[i].position.lng == newObject.Longitude) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
     var coords = [{
