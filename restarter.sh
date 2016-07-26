@@ -2,5 +2,5 @@
 
 while true; do
   git pull
-  npm start
+  NODE_ENV=production npm start
 done
