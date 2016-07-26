@@ -25,8 +25,7 @@
     "nodemon": "^1.9.2",
     "pokemon-go-node-api": "git://github.com/WAMP42/Pokemon-GO-node-api.git",
     "s2geometry-node": "^1.1.0",
-    "serve-favicon": "^2.0.1",
-    "underscore": "^1.8.3"
+    "serve-favicon": "^2.0.1"
   },
   "devDependencies": {
     "jshint": "^2.5.6",
