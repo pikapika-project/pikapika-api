@@ -37,7 +37,7 @@ module.exports = function(app) {
 
         var Pokeio = new PokemonGO.Pokeio();
         var stepSize = 0.0015;
-        var stepLimit = 30;
+        var stepLimit = 49;
         var qs = [];
 
         Pokeio.playerInfo = returnedInstance[0];
