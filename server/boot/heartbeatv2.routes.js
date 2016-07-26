@@ -124,10 +124,12 @@ module.exports = function(app) {
 
     while (steps < stepLimit) {
       while (2 * x * d < m && steps < stepLimit) {
-        x = x * d;
+        x = x + d;
         steps += 1;
-        var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
-        var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
+        var random = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        var random2 = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        var lat = x * stepSize + startingLat + random;
+        var lng = y * stepSize + startingLng + random2;
         coords.push({
           'lat': lat,
           'lng': lng
