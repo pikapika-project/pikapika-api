@@ -64,9 +64,8 @@ module.exports = function(app) {
                 for (var a = 0; a < resolves[i].cells.length; a++) {
                   if (resolves[i].cells[a].WildPokemon.length > 0) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
-                      var wp = resolves[i].cells[a].WildPokemon[x];
                       console.log(resolves[i].cells[a].WildPokemon[x]);
-
+                      var wp = resolves[i].cells[a].WildPokemon[x];
                       var now = new Date();
                       WildPokemons.push({
                         id: wp.SpawnPointId,
@@ -85,7 +84,6 @@ module.exports = function(app) {
                 }
               }
               app.models.pokemon.create(WildPokemons, function(err, obj) {
-                console.log(WildPokemons);
                 res.json({
                   data: WildPokemons,
                   data_length: WildPokemons.length
@@ -120,7 +118,7 @@ module.exports = function(app) {
     var d = 1;
     var m = 1;
     var rlow = 0.0;
-    var rhigh = 0.00005;
+    var rhigh = 0.0005;
 
     while (steps < stepLimit) {
       while (2 * x * d < m && steps < stepLimit) {
