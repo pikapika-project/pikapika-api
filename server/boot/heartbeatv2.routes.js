@@ -36,8 +36,8 @@ module.exports = function(app) {
         var cells = [];
 
         var Pokeio = new PokemonGO.Pokeio();
-        var stepSize = 0.0015
-        var stepLimit = 49
+        var stepSize = 0.0015;
+        var stepLimit = 30;
         var qs = [];
 
         Pokeio.playerInfo = returnedInstance[0];
@@ -69,7 +69,7 @@ module.exports = function(app) {
                     for (var x = 0; x < resolves[i].cells[a].WildPokemon.length; x++) {
                       wp = resolves[i].cells[a].WildPokemon[x];
                       now = new Date();
-                      if (_.findWhere(WildPokemons, wp) == null) {
+                      if (_.findWhere(WildPokemons, wp) == undefined) {
                         WildPokemons.push({
                           id: wp.SpawnPointId,
                           number: wp.pokemon.PokemonId,
@@ -83,6 +83,7 @@ module.exports = function(app) {
                           expireAt: new Date(now.getTime() + wp.TimeTillHiddenMs)
                         });
                       }
+
                     }
                   }
                 }
