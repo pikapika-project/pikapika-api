@@ -14,26 +14,26 @@ module.exports = function(app) {
       });
     }
 
-    var trainer = req.body;
-    var Pokeio = new PokemonGO.Pokeio();
+    var Pokeio        = new PokemonGO.Pokeio();
     var PokemonGoInit = Promise.promisify(Pokeio.init);
     var now;
+
+    var trainer = req.body;
+    var filter  = {
+      where: {
+        username: trainer.username,
+        provider: trainer.provider.name
+      }
+    };
 
     Trainer = app.models.trainer;
 
     PokemonGoInit().then(session => {
 
-      var filter = {
-        where: {
-          username: trainer.username,
-          provider: trainer.provider.name
-        }
-      };
-
       var newTrainer = {
-        username: trainer.username,
+        username:    trainer.username,
         accessToken: session.accessToken,
-        provider: trainer.provider.name,
+        provider:    trainer.provider.name,
         apiEndpoint: session.apiEndpoint
       }
 
@@ -61,7 +61,7 @@ module.exports = function(app) {
       res.json({
         data: {
           access_token: session.accessToken,
-          expire_time: session.tokenExpireTime
+          expire_time:  session.tokenExpireTime
         }
       });
 
@@ -77,16 +77,16 @@ module.exports = function(app) {
     var statusCode, statusMessage;
 
     if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
+      statusCode    = err.statusCode || 400;
       statusMessage = err.message;
     } else {
-      statusCode = err.response.statusCode || 400;
+      statusCode    = err.response.statusCode || 400;
       statusMessage = err.response.statusMessage;
     }
 
     res.status(statusCode).json({
       error: {
-        statusCode: statusCode,
+        statusCode:    statusCode,
         statusMessage: statusMessage
       }
     });
