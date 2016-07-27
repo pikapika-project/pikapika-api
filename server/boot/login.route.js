@@ -17,6 +17,8 @@ module.exports = function(app) {
     var trainer = req.body;
     var Pokeio = new PokemonGO.Pokeio();
     var PokemonGoInit = Promise.promisify(Pokeio.init);
+    var now;
+
     Trainer = app.models.trainer;
 
     PokemonGoInit().then(session => {
@@ -40,13 +42,20 @@ module.exports = function(app) {
           sendError(err, res);
         }
 
-        if (!created) {
-          createdTrainer.updateAttributes(newTrainer, function(err, instance) {
-            if (err) {
-              sendError(err, res);
-            }
-          });
+        now = new Date();
+
+        if (created) {
+          newTrainer.createdAt = now;
+          newTrainer.updatedAt = now;
+        } else {
+          newTrainer.updatedAt = now;
         }
+
+        createdTrainer.updateAttributes(newTrainer, function(err, instance) {
+          if (err) {
+            sendError(err, res);
+          }
+        });
       });
 
       res.json({
