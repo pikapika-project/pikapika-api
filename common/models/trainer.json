@@ -24,10 +24,6 @@
       "type": "string",
       "required": true
     },
-    "apiEndpoint": {
-      "type": "string",
-      "required": true
-    },
     "createdAt": {
       "type": "Date",
       "required": true
