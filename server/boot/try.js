@@ -20,9 +20,9 @@ login.login('poketests42@gmail.com', 'piripepiripe')
     client.setAuthInfo('google', token);
     client.setPosition(lat, lng);
 
-    // Uncomment the following if you want to see request/response information on the console
-    //client.on('request', console.dir);
-    //client.on('response', console.dir);
+    // request/response information on the console
+    client.on('request', console.dir);
+    client.on('response', console.dir);
 
     // Perform the initial request
     return client.init();
@@ -46,6 +46,7 @@ login.login('poketests42@gmail.com', 'piripepiripe')
 
     Promise.all(qs).then(response => {
       for (var i = 0; i < response.length; i++) {
+        console.log(response[i]);
         if (response[i] !== true) {
           for (var a = 0; a < response[i].map_cells.length; a++) {
             if (response[i].map_cells[a].wild_pokemons.length > 0) {
@@ -124,23 +125,4 @@ function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
   }
 
   return coords;
-}
-
-function sendError(err, res) {
-  var statusCode, statusMessage;
-
-  if (err instanceof Error) {
-    statusCode = err.statusCode || 400;
-    statusMessage = err.message;
-  } else {
-    statusCode = err.response.statusCode || 400;
-    statusMessage = err.response.statusMessage;
-  }
-
-  res.status(statusCode).json({
-    error: {
-      statusCode: statusCode,
-      statusMessage: statusMessage
-    }
-  });
 }
