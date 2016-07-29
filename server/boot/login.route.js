@@ -18,11 +18,9 @@ module.exports = function(app) {
     var trainer = req.body;
     var Pokeio  = new PokemonGO.Pokeio();
 
-    Pokeio.init(trainer.username, trainer.location, trainer.provider, function(err, session) {
-      if (err) {
-        sendError(err, res);
-        return false;
-      }
+    Trainer = app.models.trainer;
+
+    PokemonGoInit(trainer.username, trainer.location, trainer.provider).then(session => {
 
       Trainer = app.models.trainer;
       var filter = {
