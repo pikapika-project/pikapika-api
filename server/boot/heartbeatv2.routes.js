@@ -1,8 +1,8 @@
-const pogobuf     = require('pogobuf'),
-      POGOProtos  = require('node-pogo-protos');
-      GeoPoint    = require('loopback').GeoPoint;
-      client      = pogobuf.Client();
-      s2          = require('s2geometry-node');
+const pogobuf = require('pogobuf'),
+  POGOProtos = require('node-pogo-protos');
+GeoPoint = require('loopback').GeoPoint;
+client = pogobuf.Client();
+s2 = require('s2geometry-node');
 
 module.exports = function(app) {
 
@@ -36,37 +36,42 @@ module.exports = function(app) {
         client.setAuthInfo('google', currentUser.accessToken);
         client.setPosition(req.params.lat, req.params.lng);
 
+        client.init()
+          .then(() => {
+            var pokemons = [];
+            var stepSize = 0.0015;
+            var stepLimit = 30;
+            cell_ids = [];
+            timestamps = [];
+            var p, now;
+            var coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
 
-        var pokemons = [];
-        var qs = [];
-        var stepSize = 0.0015;
-        var stepLimit = 50;
-
-        var p, now;
-        var coordsToScan = generateSpiral(req.params.lat, req.params.lng, stepSize, stepLimit);
-
-        client.init().then(() => {
-
-        });
-
-        for (var i = 0; i < coordsToScan.length; i++) {
-          var lat = parseFloat(coordsToScan[i].lat);
-          var lng = parseFloat(coordsToScan[i].lng);
-
-          client.setPosition(lat, lng);
-
-          var cell_ids = get_cell_ids(lat, lng);
-          var timestamps = [0,] * cell_ids.length
-
-            (function(arguments) {
+            for (var i = 0; i < coordsToScan.length; i++) {
+              lat = parseFloat(coordsToScan[i].lat);
+              lng = parseFloat(coordsToScan[i].lng);
+              cell_ids = get_cell_ids(lat, lng);
+              timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
               qs.push(client.getMapObjects(cell_ids, timestamps));
-            })();
-        }
+            }
 
-        Promise.all(qs)
-          .then(resolves => {
-            console.log(resolves);
+            Promise.all(qs).then(response => {
+              for (var i = 0; i < response.length; i++) {
+                if (response[i] !== true) {
+                  console.log(response[i]);
+                  for (var a = 0; a < response[i].map_cells.length; a++) {
+                    if (response[i].map_cells[a].wild_pokemons.length > 0) {
+                      pokemons.push(response[i].map_cells[a].wild_pokemons);
+                    }
+                  }
+                }
+              }
+              console.log(pokemons.length);
+              res.json({data: pokemons});
+            }).catch(err => {
+              console.log(err);
+            });
           });
+
       }
     });
   });

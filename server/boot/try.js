@@ -1,6 +1,5 @@
 const pogobuf = require('pogobuf'),
   POGOProtos = require('node-pogo-protos');
-GeoPoint = require('loopback').GeoPoint;
 s2 = require('s2geometry-node'),
   Promise = require("bluebird");
 var util = require('util');
@@ -9,15 +8,15 @@ const fs = require('fs');
 var lat = 20.671794;
 var lng = -103.368918;
 
-const login = pogobuf.GoogleLogin()
+const login = pogobuf.PTCLogin()
 client = pogobuf.Client();
 
 var qs = [];
 
-login.login('poketests42@gmail.com', 'piripepiripe')
+login.login('poketests42', 'piripe')
   .then(token => {
     // Initialize the client
-    client.setAuthInfo('google', token);
+    client.setAuthInfo('ptc', token);
     client.setPosition(lat, lng);
 
     // request/response information on the console
@@ -30,7 +29,7 @@ login.login('poketests42@gmail.com', 'piripepiripe')
   .then(() => {
     var pokemons = [];
     var stepSize = 0.0015;
-    var stepLimit = 10;
+    var stepLimit = 30;
     cell_ids = [];
     timestamps = [];
     var p, now;
@@ -46,8 +45,8 @@ login.login('poketests42@gmail.com', 'piripepiripe')
 
     Promise.all(qs).then(response => {
       for (var i = 0; i < response.length; i++) {
-        console.log(response[i]);
         if (response[i] !== true) {
+          console.log(response[i]);
           for (var a = 0; a < response[i].map_cells.length; a++) {
             if (response[i].map_cells[a].wild_pokemons.length > 0) {
               pokemons.push(response[i].map_cells[a].wild_pokemons);
@@ -55,11 +54,11 @@ login.login('poketests42@gmail.com', 'piripepiripe')
           }
         }
       }
-      console.log('Pokemons:');
+      console.log(pokemons);
       console.log(pokemons.length);
     }).catch(err => {
       console.log(err);
-    })
+    });
 
   });
 
