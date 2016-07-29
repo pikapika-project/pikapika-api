@@ -2,83 +2,50 @@ var PokemonGO = require('pokemon-go-node-api');
 
 module.exports = function(app) {
 
+  Trainer = app.models.trainer;
+
   app.post('/trainers/login', function(req, res) {
 
-    console.log("[i] Login from " + req.headers['cf-ipcountry'] + " ("+ req.headers['x-forwarded-for'] + ")");
-
-    if (!req.body) {
+    if (!req.body || !req.body.device_unique_id || !req.body.provider) {
       res.status(404).json({
         error: {
-          statusCode   : 404,
-          statusMessage: "Missing parameters."
+          statusCode :    404,
+          statusMessage : "Missing parameters."
         }
       });
     }
 
-    var trainer = req.body;
-    var Pokeio  = new PokemonGO.Pokeio();
-
-    Trainer = app.models.trainer;
-
-    PokemonGoInit(trainer.username, trainer.location, trainer.provider).then(session => {
-
-      Trainer = app.models.trainer;
-      var filter = {
-        where: {
-          username: trainer.username,
-          provider: trainer.provider.name
-        }
-      };
-      var newTrainer = {
-        username   : trainer.username,
-        accessToken: Pokeio.playerInfo.accessToken,
-        provider   : trainer.provider.name,
-        apiEndpoint: Pokeio.playerInfo.apiEndpoint
+    var filter = {
+      where: {
+        _id: req.body.device_unique_id
       }
+    }
+    Trainer.findOne(filter, function(err, trainer) {
+      var now = new Date();
 
-      Trainer.findOrCreate(filter, newTrainer, function(err, createdTrainer, created) {
-        if (err) {
-          sendError(err, res);
-        }
+      if (trainer) {
+        trainer.id        = undefined;
+        trainer.provider  = req.body.provider;
+        trainer.updatedAt = now;
 
-        if (!created) {
-          createdTrainer.updateAttributes(newTrainer, function(err, instance) {
-            if (err) {
-              sendError(err, res);
-            }
-          });
-        }
-      });
+        trainer.updateAttributes(trainer);
+      } else {
+        trainer = {
+          _id:       req.body.device_unique_id,
+          provider:  req.body.provider,
+          createdAt: now,
+          updatedAt: now
+        };
+
+        Trainer.create(trainer);
+      }
 
       res.json({
         data: {
-          access_token: session.accessToken,
-          expire_time : session.expireTime
+          trainer: trainer
         }
       });
     });
   });
-
-  function sendError(err, res) {
-
-    console.log(err);
-
-    var statusCode, statusMessage;
-
-    if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
-      statusMessage = err.message;
-    } else {
-      statusCode = err.response.statusCode || 400;
-      statusMessage = err.response.statusMessage;
-    }
-
-    res.status(statusCode).json({
-      error: {
-        statusCode: statusCode,
-        statusMessage: statusMessage
-      }
-    });
-  }
 
 }
