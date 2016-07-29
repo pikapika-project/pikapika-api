@@ -30,7 +30,7 @@ login.login('poketests42@gmail.com', 'piripepiripe')
   .then(() => {
     var pokemons = [];
     var stepSize = 0.0015;
-    var stepLimit = 50;
+    var stepLimit = 10;
     cell_ids = [];
     timestamps = [];
     var p, now;
