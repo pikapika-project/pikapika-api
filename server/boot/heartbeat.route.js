@@ -7,7 +7,7 @@ let POGOProtos  = require('node-pogo-protos')
 ,   Pokeio      = new PokemonGO.Pokeio();
 
 module.exports = function(app) {
-  app.get('/v2/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
+  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
     let client = pogobuf.Client();
 
