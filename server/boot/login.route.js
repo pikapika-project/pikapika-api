@@ -32,7 +32,7 @@ module.exports = function(app) {
 
       var newTrainer = {
         username:    trainer.username,
-        accessToken: session.accessToken,
+        accessToken: trainer.provider.token,
         provider:    trainer.provider.name,
         apiEndpoint: session.apiEndpoint
       }
@@ -60,7 +60,7 @@ module.exports = function(app) {
 
       res.json({
         data: {
-          access_token: session.accessToken,
+          access_token: trainer.provider.accessToken,
           expire_time:  session.tokenExpireTime
         }
       });
