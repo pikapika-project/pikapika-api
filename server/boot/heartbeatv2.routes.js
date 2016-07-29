@@ -1,13 +1,15 @@
 const pogobuf = require('pogobuf');
-var POGOProtos = require('node-pogo-protos');
-var s2 = require('s2geometry-node');
-var Promise = require("bluebird");
 
-var client = pogobuf.Client();
+let POGOProtos  = require('node-pogo-protos')
+,   PokemonGO   = require('pokemon-go-node-api')
+,   s2          = require('s2geometry-node')
+,   Promise     = require('bluebird')
+,   Pokeio      = new PokemonGO.Pokeio();
 
 module.exports = function(app) {
+  app.get('/v2/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
 
-  app.get('/pokemons/:lat/:lng/heartbeat/v2', function(req, res, next) {
+    let client = pogobuf.Client();
 
     if (!req.query.access_token || !req.params.lat || !req.params.lng) {
       res.status(404).json({
@@ -18,58 +20,79 @@ module.exports = function(app) {
       });
     }
 
-    var qs = [];
-    var pokemons = [];
-    var stepSize = 0.0015;
-    var stepLimit = 30;
-    var cell_ids = [];
-    var timestamps = [];
+    let qs = [];
+    let pokemons = [];
+    let stepSize = 0.0015;
+    let stepLimit = 30;
+    let cell_ids = [];
+    let timestamps = [];
 
-    var lat = parseFloat(req.params.lat);
-    var lng = parseFloat(req.params.lng);
-    var coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
+    let lat = parseFloat(req.params.lat);
+    let lng = parseFloat(req.params.lng);
+    let coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
 
-    client.setAuthInfo('ptc', token);
+    client.setAuthInfo('google', req.query['access_token']);
     client.setPosition(lat, lng);
     client.init()
-      .then(value => {
-        console.log(value);
-        for (var i = 0; i < coordsToScan.length; i++) {
-          lat = parseFloat(coordsToScan[i].lat);
-          lng = parseFloat(coordsToScan[i].lng);
-          cell_ids = get_cell_ids(lat, lng);
-          timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
-          qs.push(client.getMapObjects(cell_ids, timestamps));
-        }
-        Promise.all(qs).then(response => {
-          for (var i = 0; i < response.length; i++) {
-            if (response[i] !== true) {
-              console.log(response[i]);
-              for (var a = 0; a < response[i].map_cells.length; a++) {
-                if (response[i].map_cells[a].wild_pokemons.length > 0) {
-                  pokemons.push(response[i].map_cells[a].wild_pokemons);
+    .then(value => {
+      for (let i = 0; i < coordsToScan.length; i++) {
+        lat = parseFloat(coordsToScan[i].lat);
+        lng = parseFloat(coordsToScan[i].lng);
+
+        client.setPosition(lat, lng);
+
+        cell_ids = get_cell_ids(lat, lng);
+        timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
+
+        qs.push(
+          client.getMapObjects(cell_ids, timestamps)
+        );
+      }
+      Promise.all(qs).then(response => {
+        let pokemon;
+        for (let i = 0; i < response.length; i++) {
+          if (response[i] !== true) {
+            for (let a = 0; a < response[i].map_cells.length; a++) {
+              for(let x = 0; x < response[i].map_cells[a].wild_pokemons.length; x++){
+                pokemon = response[i].map_cells[a].wild_pokemons[x];
+
+                if(!isExist(pokemons, pokemon)){
+                  pokemon = {
+                    id:       pokemon.spawn_point_id,
+                    number:   pokemon.pokemon_data.pokemon_id,
+                    name:     Pokeio.pokemonlist[pokemon.pokemon_data.pokemon_id - 1].name,
+                    timeleft: pokemon.time_till_hidden_ms,
+                    position: {
+                      lat: pokemon.latitude,
+                      lng: pokemon.longitude
+                    }
+                  };
                 }
+
+                pokemons.push(pokemon);
               }
             }
           }
-          res.json({data: pokemons});
-        }).catch(err => {
-          console.log(err);
-        });
-      })
-      .catch(err => {
+        }
+        res.json({data: pokemons});
+      }).catch(err => {
         console.log(err);
-      })
+      });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(423).json({error: err});
+    });
 
   });
 
   function get_cell_ids(lat, lng) {
-    var origin = new s2.S2CellId(new s2.S2LatLng(lat, lng)).parent(15);
-    var walk = [origin.id()];
+    let origin = new s2.S2CellId(new s2.S2LatLng(lat, lng)).parent(15);
+    let walk = [origin.id()];
     // 10 before and 10 after
-    var next = origin.next();
-    var prev = origin.prev();
-    for (var i = 0; i < 10; i++) {
+    let next = origin.next();
+    let prev = origin.prev();
+    for (let i = 0; i < 10; i++) {
       // in range(10):
       walk.push(prev.id());
       walk.push(next.id());
@@ -80,27 +103,27 @@ module.exports = function(app) {
   }
 
   function generateSpiral(startingLat, startingLng, stepSize, stepLimit) {
-    var coords = [{
+    let coords = [{
       'lat': startingLat,
       'lng': startingLng
     }];
 
-    var steps = 1;
-    var x = 0;
-    var y = 0;
-    var d = 1;
-    var m = 1;
-    var rlow = 0.0;
-    var rhigh = 0.0005;
+    let steps = 1;
+    let x = 0;
+    let y = 0;
+    let d = 1;
+    let m = 1;
+    let rlow = 0.0;
+    let rhigh = 0.0005;
 
     while (steps < stepLimit) {
       while (2 * x * d < m && steps < stepLimit) {
         x = x + d;
         steps += 1;
-        var random = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
-        var random2 = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
-        var lat = x * stepSize + startingLat + random;
-        var lng = y * stepSize + startingLng + random2;
+        let random = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        let random2 = (Math.random() * (rlow - rhigh) + rhigh).toFixed(4);
+        let lat = x * stepSize + startingLat + random;
+        let lng = y * stepSize + startingLng + random2;
 
         coords.push({
           'lat': lat,
@@ -111,8 +134,8 @@ module.exports = function(app) {
       while (2 * y * d < m && steps < stepLimit) {
         y = y + d;
         steps += 1;
-        var lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
-        var lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
+        let lat = x * stepSize + startingLat + (Math.random() * (rlow - rhigh) + rlow);
+        let lng = y * stepSize + startingLng + (Math.random() * (rlow - rhigh) + rlow);
 
         coords.push({
           'lat': lat,
@@ -127,7 +150,7 @@ module.exports = function(app) {
   }
 
   function sendError(err, res) {
-    var statusCode, statusMessage;
+    let statusCode, statusMessage;
 
     if (err instanceof Error) {
       statusCode = err.statusCode || 400;
@@ -142,6 +165,12 @@ module.exports = function(app) {
         statusCode: statusCode,
         statusMessage: statusMessage
       }
+    });
+  }
+
+  function isExist(pokemons, pokemon) {
+    return pokemons.some(function (p) {
+      return p.id === pokemon.spawn_point_id;
     });
   }
 
