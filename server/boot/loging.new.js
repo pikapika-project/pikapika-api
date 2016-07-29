@@ -1,9 +1,8 @@
-const pogobuf = require('pogobuf'),
-  POGOProtos = require('node-pogo-protos');
-
+const pogobuf = require('pogobuf');
 const client = pogobuf.Client();
 
 module.exports = function(app) {
+  Trainer = app.models.trainer;
 
   app.post('/trainers/login/v2', function(req, res) {
 
@@ -15,39 +14,29 @@ module.exports = function(app) {
         }
       });
     }
-    var now;
-    var trainer = req.body;
 
-    var filter = {
+    var filter  = {
       where: {
         username: trainer.username,
         provider: trainer.provider.name
       }
     };
 
-    Trainer = app.models.trainer;
-
-    var newTrainer = {
-      username: trainer.username,
-      accessToken: trainer.accessToken,
-      provider: trainer.provider.name,
-    }
-
-    Trainer.findOrCreate(filter, newTrainer, function(err, createdTrainer, created) {
+    Trainer.findOrCreate(filter, req.body, function(err, resTrainer, created) {
       if (err) {
         sendError(err, res);
       }
 
-      now = new Date();
+      var now = new Date();
 
       if (created) {
-        newTrainer.createdAt = now;
-        newTrainer.updatedAt = now;
+        resTrainer.createdAt = now;
+        resTrainer.updatedAt = now;
       } else {
-        newTrainer.updatedAt = now;
+        resTrainer.updatedAt = now;
       }
 
-      createdTrainer.updateAttributes(newTrainer, function(err, instance) {
+      resTrainer.updateAttributes(resTrainer, function(err, instance) {
         if (err) {
           sendError(err, res);
         }
@@ -56,8 +45,7 @@ module.exports = function(app) {
 
     res.json({
       data: {
-        access_token: trainer.accessToken,
-        expire_time: trainer.tokenExpireTime
+        trainer: resTrainer
       }
     });
 
