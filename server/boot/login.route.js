@@ -28,7 +28,7 @@ module.exports = function(app) {
 
     Trainer = app.models.trainer;
 
-    PokemonGoInit().then(session => {
+    PokemonGoInit(trainer.username, trainer.location, trainer.provider).then(session => {
 
       var newTrainer = {
         username:    trainer.username,
