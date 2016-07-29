@@ -75,13 +75,10 @@ module.exports = function(app) {
           }
         }
         res.json({data: pokemons});
-      }).catch(err => {
-        console.log(err);
       });
     })
     .catch(err => {
-      console.log(err);
-      res.status(423).json({error: err});
+      res.status(429).json({error: err});
     });
 
   });
