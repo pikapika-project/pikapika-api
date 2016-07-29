@@ -1,8 +1,9 @@
-const pogobuf = require('pogobuf'),
-  POGOProtos = require('node-pogo-protos');
-GeoPoint = require('loopback').GeoPoint;
-client = pogobuf.Client();
-s2 = require('s2geometry-node');
+const pogobuf = require('pogobuf');
+var POGOProtos = require('node-pogo-protos');
+var s2 = require('s2geometry-node');
+var Promise = require("bluebird");
+
+var client = pogobuf.Client();
 
 module.exports = function(app) {
 
@@ -17,63 +18,49 @@ module.exports = function(app) {
       });
     }
 
-    Trainer = app.models.trainer;
+    var qs = [];
+    var pokemons = [];
+    var stepSize = 0.0015;
+    var stepLimit = 30;
+    var cell_ids = [];
+    var timestamps = [];
 
-    var filter = {
-      where: {
-        accessToken: req.query.access_token
-      }
-    };
+    var lat = parseFloat(req.params.lat);
+    var lng = parseFloat(req.params.lng);
+    var coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
 
-    Trainer.find(filter, function(err, returnedInstance) {
-      if (err) {
-        sendError(err, res);
-      }
-
-      if (returnedInstance[0]) {
-        var currentUser = returnedInstance[0];
-
-        client.setAuthInfo('google', currentUser.accessToken);
-        client.setPosition(req.params.lat, req.params.lng);
-
-        client.init()
-          .then(() => {
-            var pokemons = [];
-            var stepSize = 0.0015;
-            var stepLimit = 30;
-            cell_ids = [];
-            timestamps = [];
-            var p, now;
-            var coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
-
-            for (var i = 0; i < coordsToScan.length; i++) {
-              lat = parseFloat(coordsToScan[i].lat);
-              lng = parseFloat(coordsToScan[i].lng);
-              cell_ids = get_cell_ids(lat, lng);
-              timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
-              qs.push(client.getMapObjects(cell_ids, timestamps));
-            }
-
-            Promise.all(qs).then(response => {
-              for (var i = 0; i < response.length; i++) {
-                if (response[i] !== true) {
-                  console.log(response[i]);
-                  for (var a = 0; a < response[i].map_cells.length; a++) {
-                    if (response[i].map_cells[a].wild_pokemons.length > 0) {
-                      pokemons.push(response[i].map_cells[a].wild_pokemons);
-                    }
-                  }
+    client.setAuthInfo('ptc', token);
+    client.setPosition(lat, lng);
+    client.init()
+      .then(value => {
+        console.log(value);
+        for (var i = 0; i < coordsToScan.length; i++) {
+          lat = parseFloat(coordsToScan[i].lat);
+          lng = parseFloat(coordsToScan[i].lng);
+          cell_ids = get_cell_ids(lat, lng);
+          timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
+          qs.push(client.getMapObjects(cell_ids, timestamps));
+        }
+        Promise.all(qs).then(response => {
+          for (var i = 0; i < response.length; i++) {
+            if (response[i] !== true) {
+              console.log(response[i]);
+              for (var a = 0; a < response[i].map_cells.length; a++) {
+                if (response[i].map_cells[a].wild_pokemons.length > 0) {
+                  pokemons.push(response[i].map_cells[a].wild_pokemons);
                 }
               }
-              console.log(pokemons.length);
-              res.json({data: pokemons});
-            }).catch(err => {
-              console.log(err);
-            });
-          });
+            }
+          }
+          res.json({data: pokemons});
+        }).catch(err => {
+          console.log(err);
+        });
+      })
+      .catch(err => {
+        console.log(err);
+      })
 
-      }
-    });
   });
 
   function get_cell_ids(lat, lng) {
