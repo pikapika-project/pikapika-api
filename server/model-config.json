@@ -33,11 +33,11 @@
     "public": false
   },
   "trainer": {
-    "dataSource": "db",
+    "dataSource": "mongo",
     "public": true
   },
   "pokemon": {
-    "dataSource": "db",
+    "dataSource": "mongo",
     "public": true
   }
 }
