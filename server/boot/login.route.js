@@ -13,6 +13,7 @@ module.exports = function(app) {
           statusMessage : "Missing parameters."
         }
       });
+      return;
     }
 
     var filter = {

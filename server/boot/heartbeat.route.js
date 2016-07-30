@@ -18,6 +18,7 @@ module.exports = function(app) {
           statusMessage: "Missing parameters."
         }
       });
+      return;
     }
 
     let qs = [];
