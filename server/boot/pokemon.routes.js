@@ -1,13 +1,16 @@
 const pogobuf = require('pogobuf');
 
-let POGOProtos  = require('node-pogo-protos')
-,   PokemonGO   = require('pokemon-go-node-api')
-,   s2          = require('s2geometry-node')
+let PokemonGO   = require('pokemon-go-node-api')
 ,   Promise     = require('bluebird')
-,   Pokeio      = new PokemonGO.Pokeio();
+,   s2          = require('s2geometry-node')
+,   Pokeio      = new PokemonGO.Pokeio()
 
 module.exports = function(app) {
-  app.get('/pokemons/:lat/:lng/heartbeat', function(req, res, next) {
+
+  app.get('/pokemons/:lat/:lng/heartbeat', getHeartbeat);
+  app.get('/pokemons/:lat/:lng/:radius',   getPokemon);
+
+  function getHeartbeat(req, res, next) {
 
     let client = pogobuf.Client();
 
@@ -32,60 +35,68 @@ module.exports = function(app) {
     let lng = parseFloat(req.params.lng);
     let coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
 
-    client.setAuthInfo('google', req.query['access_token']);
+    client.setAuthInfo('google', req.query.access_token);
     client.setThrottleDelay(600);
     client.setPosition(lat, lng);
     client.init()
-    .then(value => {
-      for (let i = 0; i < coordsToScan.length; i++) {
-        lat = parseFloat(coordsToScan[i].lat);
-        lng = parseFloat(coordsToScan[i].lng);
+      .then(value => {
+        for (let i = 0; i < coordsToScan.length; i++) {
+          lat = parseFloat(coordsToScan[i].lat);
+          lng = parseFloat(coordsToScan[i].lng);
 
-        client.setPosition(lat, lng);
+          client.setPosition(lat, lng);
 
-        cell_ids = get_cell_ids(lat, lng);
-        timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
+          cell_ids   = get_cell_ids(lat, lng);
+          timestamps = new Array(cell_ids.length + 1).join('0').split('').map(parseFloat);
 
-        qs.push(
-          client.getMapObjects(cell_ids, timestamps)
-        );
-      }
-      Promise.all(qs).then(response => {
-        let pokemon;
-        for (let i = 0; i < response.length; i++) {
-          if (response[i] !== true) {
-            for (let a = 0; a < response[i].map_cells.length; a++) {
-              for(let x = 0; x < response[i].map_cells[a].wild_pokemons.length; x++){
-                pokemon = response[i].map_cells[a].wild_pokemons[x];
+          qs.push(
+            client.getMapObjects(cell_ids, timestamps)
+          );
+        }
+        Promise.all(qs).then(response => {
+          let pokemon;
+          for (let i = 0; i < response.length; i++) {
+            if (response[i] !== true) {
+              for (let a = 0; a < response[i].map_cells.length; a++) {
+                for (let x = 0; x < response[i].map_cells[a].wild_pokemons.length; x++) {
+                  pokemon = response[i].map_cells[a].wild_pokemons[x];
 
-                if(!isExist(pokemons, pokemon)){
-                  pokemon = {
-                    id:       pokemon.spawn_point_id,
-                    number:   pokemon.pokemon_data.pokemon_id,
-                    name:     Pokeio.pokemonlist[pokemon.pokemon_data.pokemon_id - 1].name,
-                    timeleft: pokemon.time_till_hidden_ms,
-                    position: {
-                      lat: pokemon.latitude,
-                      lng: pokemon.longitude
-                    }
-                  };
+                  if (!isExist(pokemons, pokemon)) {
+                    pokemon = {
+                      id:       pokemon.spawn_point_id,
+                      number:   pokemon.pokemon_data.pokemon_id,
+                      name:     Pokeio.pokemonlist[pokemon.pokemon_data.pokemon_id - 1].name,
+                      timeleft: pokemon.time_till_hidden_ms,
+                      position: {
+                        lat: pokemon.latitude,
+                        lng: pokemon.longitude
+                      }
+                    };
+                  }
+
+                  pokemons.push(pokemon);
                 }
-
-                pokemons.push(pokemon);
               }
             }
           }
-        }
-        res.json({data: pokemons});
+
+          res.json({data: pokemons});
+        });
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(429).json({error: err});
       });
-    })
-    .catch(err => {
-      console.log(err);
-      res.status(429).json({error: err});
-    });
+  }
 
-  });
+  function getPokemon(req, res, next) {
 
+  }
+
+
+  /*
+   * UTILS functions
+   */
   function get_cell_ids(lat, lng) {
     let origin = new s2.S2CellId(new s2.S2LatLng(lat, lng)).parent(15);
     let walk = [origin.id()];
@@ -147,25 +158,6 @@ module.exports = function(app) {
     }
 
     return coords;
-  }
-
-  function sendError(err, res) {
-    let statusCode, statusMessage;
-
-    if (err instanceof Error) {
-      statusCode = err.statusCode || 400;
-      statusMessage = err.message;
-    } else {
-      statusCode = err.response.statusCode || 400;
-      statusMessage = err.response.statusMessage;
-    }
-
-    res.status(statusCode).json({
-      error: {
-        statusCode: statusCode,
-        statusMessage: statusMessage
-      }
-    });
   }
 
   function isExist(pokemons, pokemon) {

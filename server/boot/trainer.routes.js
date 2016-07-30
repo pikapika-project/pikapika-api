@@ -4,7 +4,9 @@ module.exports = function(app) {
 
   Trainer = app.models.trainer;
 
-  app.post('/trainers/login', function(req, res) {
+  app.post('/trainers/login', doLogin);
+
+  function doLogin(req, res) {
 
     if (!req.body || !req.body.device_unique_id || !req.body.provider) {
       res.status(404).json({
@@ -46,6 +48,6 @@ module.exports = function(app) {
         }
       });
     });
-  });
+  }
 
 }
