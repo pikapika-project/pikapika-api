@@ -4,6 +4,7 @@ let PokemonGO   = require('pokemon-go-node-api')
 ,   Promise     = require('bluebird')
 ,   s2          = require('s2geometry-node')
 ,   Pokeio      = new PokemonGO.Pokeio()
+,   GeoPoint    = require('loopback').GeoPoint;
 
 module.exports = function(app) {
 
