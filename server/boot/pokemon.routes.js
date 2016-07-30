@@ -30,6 +30,7 @@ module.exports = function(app) {
     let stepLimit = 30;
     let cell_ids = [];
     let timestamps = [];
+    let now;
 
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
@@ -63,15 +64,19 @@ module.exports = function(app) {
                   pokemon = response[i].map_cells[a].wild_pokemons[x];
 
                   if (!isExist(pokemons, pokemon)) {
+                    now = new Date();
+
                     pokemons.push({
                       id:       pokemon.spawn_point_id,
                       number:   pokemon.pokemon_data.pokemon_id,
                       name:     Pokeio.pokemonlist[pokemon.pokemon_data.pokemon_id - 1].name,
-                      timeleft: pokemon.time_till_hidden_ms,
-                      position: {
+                      position: new GeoPoint({
                         lat: pokemon.latitude,
                         lng: pokemon.longitude
-                      }
+                      }),
+                      timeleft:  pokemon.time_till_hidden_ms,
+                      createdAt: now,
+                      expireAt:  new Date(now.getTime() + pokemon.time_till_hidden_ms)
                     });
                   }
                 }
@@ -79,7 +84,12 @@ module.exports = function(app) {
             }
           }
 
-          res.json({data: pokemons});
+          app.models.pokemon.create(pokemons, function(err, obj) {
+            res.json({
+              data:        pokemons,
+              data_length: pokemons.length
+            });
+          });
         });
       })
       .catch(err => {
