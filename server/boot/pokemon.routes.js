@@ -53,6 +53,7 @@ module.exports = function(app) {
             client.getMapObjects(cell_ids, timestamps)
           );
         }
+
         Promise.all(qs).then(response => {
           let pokemon;
           for (let i = 0; i < response.length; i++) {
@@ -62,7 +63,7 @@ module.exports = function(app) {
                   pokemon = response[i].map_cells[a].wild_pokemons[x];
 
                   if (!isExist(pokemons, pokemon)) {
-                    pokemon = {
+                    pokemons.push({
                       id:       pokemon.spawn_point_id,
                       number:   pokemon.pokemon_data.pokemon_id,
                       name:     Pokeio.pokemonlist[pokemon.pokemon_data.pokemon_id - 1].name,
@@ -71,10 +72,8 @@ module.exports = function(app) {
                         lat: pokemon.latitude,
                         lng: pokemon.longitude
                       }
-                    };
+                    });
                   }
-
-                  pokemons.push(pokemon);
                 }
               }
             }
