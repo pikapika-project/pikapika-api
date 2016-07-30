@@ -32,6 +32,7 @@ module.exports = function(app) {
     let coordsToScan = generateSpiral(lat, lng, stepSize, stepLimit);
 
     client.setAuthInfo('google', req.query['access_token']);
+    client.setThrottleDelay(600);
     client.setPosition(lat, lng);
     client.init()
     .then(value => {
@@ -78,6 +79,7 @@ module.exports = function(app) {
       });
     })
     .catch(err => {
+      console.log(err);
       res.status(429).json({error: err});
     });
 
