@@ -25,14 +25,13 @@ module.exports = function(app) {
       var now = new Date();
 
       if (trainer) {
-        trainer.id        = undefined;
         trainer.provider  = req.body.provider;
         trainer.updatedAt = now;
 
         trainer.updateAttributes(trainer);
       } else {
         trainer = {
-          _id:       req.body.device_unique_id,
+          id:        req.body.device_unique_id,
           provider:  req.body.provider,
           createdAt: now,
           updatedAt: now
