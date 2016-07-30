@@ -22,7 +22,9 @@
     "loopback-component-explorer": "^2.4.0",
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-datasource-juggler": "^2.39.0",
+    "node-pogo-protos": "^1.1.0",
     "nodemon": "^1.9.2",
+    "pogobuf": "git+https://github.com/cyraxx/pogobuf.git#0e7daad08f",
     "pokemon-go-node-api": "git://github.com/WAMP42/Pokemon-GO-node-api.git",
     "s2geometry-node": "^1.1.0",
     "serve-favicon": "^2.0.1"
