@@ -8,8 +8,10 @@ let PokemonGO   = require('pokemon-go-node-api')
 
 module.exports = function(app) {
 
+  Pokemon = app.models.pokemon;
+
   app.get('/pokemons/:lat/:lng/heartbeat', getHeartbeat);
-  app.get('/pokemons/:lat/:lng/:radius',   getPokemon);
+  app.get('/pokemons/:lat/:lng',           getPokemon);
 
   function getHeartbeat(req, res, next) {
 
@@ -85,7 +87,7 @@ module.exports = function(app) {
             }
           }
 
-          app.models.pokemon.create(pokemons, function(err, obj) {
+          Pokemon.create(pokemons, function(err, obj) {
             res.json({
               data:        pokemons,
               data_length: pokemons.length
@@ -101,6 +103,32 @@ module.exports = function(app) {
 
   function getPokemon(req, res, next) {
 
+    if (!req.params.lat || !req.params.lng) {
+      res.status(404).json({
+        error: {
+          statusCode: 404,
+          statusMessage: "Missing parameters."
+        }
+      });
+      return;
+    }
+
+    var radiusFilter = {
+      where: {
+        position: {
+          near:        new GeoPoint({lat: req.params.lat , lng: req.params.lng}),
+          maxDistance: req.query.radius || 2000,
+          unit:        'meters'
+        }
+      }
+    }
+
+    Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
+      res.json({
+        data:        nearbyPokemon,
+        data_length: nearbyPokemon.length
+      });
+    });
   }
 
 
