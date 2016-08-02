@@ -8,23 +8,23 @@ module.exports = function(app) {
 
   Pokemon = app.models.pokemon;
 
-  app.get('/v3/pokemons/:lat/:lng/heartbeat', getHeartbeat);
-  app.get('/v3/pokemons/:lat/:lng',           getPokemon);
+  app.get('/v2/pokemons/:lat/:lng/heartbeat', getHeartbeat);
+  app.get('/v2/pokemons/:lat/:lng',           getPokemon);
 
   function getHeartbeat(req, res, next) {
 
+    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
+      res.status(404).json({
+        error: {
+          statusCode: 404,
+          statusMessage: "Missing parameters."
+        }
+      });
+      return;
+    }
+
     const google = new pogobuf.GoogleLogin();
     let client = pogobuf.Client();
-
-    // if (!req.query.access_token || !req.params.lat || !req.params.lng) {
-    //   res.status(404).json({
-    //     error: {
-    //       statusCode: 404,
-    //       statusMessage: "Missing parameters."
-    //     }
-    //   });
-    //   return;
-    // }
 
     let pokemons = [];
     let now;
@@ -32,14 +32,9 @@ module.exports = function(app) {
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
 
-    //client.setAuthInfo('google', req.query.access_token);
-    //client.setPosition(lat, lng);
-    //client.init()
-    google.login("poketests42@gmail.com", "piripepiripe").then(token => {
-      client.setAuthInfo('google', token);
-      client.setPosition(lat, lng);
-      return client.init();
-    })
+    client.setAuthInfo('google', req.query.access_token);
+    client.setPosition(lat, lng);
+    client.init()
     .then(() => {
       var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 5);
 
@@ -80,7 +75,7 @@ module.exports = function(app) {
       })
       .catch(err => {
         console.log(err);
-        res.status(429).json({error: err});
+        res.json({error: err});
       });
   }
 
