@@ -33,7 +33,7 @@ module.exports = function(app) {
 
     client.setAuthInfo('google', req.query.access_token);
     client.setPosition(lat, lng);
-    client.setThrottleDelay(5 * 1000);
+    client.setThrottleDelay(10 * 1000);
     client.init()
     .then(() => {
       var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 5);
