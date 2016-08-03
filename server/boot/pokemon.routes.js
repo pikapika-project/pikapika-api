@@ -113,6 +113,16 @@ module.exports = function(app) {
       return;
     }
 
+    if (req.query.radius && req.query.radius > 50000) {
+      res.status(400).json({
+        error: {
+          statusCode: 400,
+          statusMessage: "Bad request."
+        }
+      });
+      return;
+    }
+
     var radiusFilter = {
       where: {
         position: {
