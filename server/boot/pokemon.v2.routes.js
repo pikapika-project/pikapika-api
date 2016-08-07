@@ -8,11 +8,11 @@ module.exports = function(app) {
 
   Pokemon = app.models.pokemon;
 
-  app.get('/v2/pokemons/:lat/:lng/heartbeat', getHeartbeat);
+  app.get('/v2/pokemons/:lat/:lng/:alt/heartbeat', getHeartbeat);
 
   function getHeartbeat(req, res, next) {
 
-    if (!req.query.access_token || !req.params.lat || !req.params.lng) {
+    if (!req.query.access_token || !req.params.lat || !req.params.lng || !req.params.alt) {
       res.status(404).json({
         error: {
           statusCode: 404,
@@ -32,7 +32,7 @@ module.exports = function(app) {
     let lng = parseFloat(req.params.lng);
 
     client.setAuthInfo('google', req.query.access_token);
-    client.setPosition(lat, lng);
+    client.setPosition(lat, lng, alt);
     client.setThrottleDelay(10 * 1000);
     client.init()
     .then(() => {
