@@ -30,10 +30,10 @@ module.exports = function(app) {
 
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
+    let alt = parseFloat(req.params.alt);
 
     client.setAuthInfo('google', req.query.access_token);
-    client.setPosition(lat, lng, alt);
-    client.setThrottleDelay(10 * 1000);
+    client.setPosition(lat, lng);
     client.init()
     .then(() => {
       var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 5);

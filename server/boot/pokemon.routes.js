@@ -41,7 +41,6 @@ module.exports = function(app) {
 
     client.setAuthInfo('google', req.query.access_token);
     client.setPosition(lat, lng);
-    client.setThrottleDelay(10 * 1000);
     client.init()
       .then(value => {
         for (let i = 0; i < coordsToScan.length; i++) {
