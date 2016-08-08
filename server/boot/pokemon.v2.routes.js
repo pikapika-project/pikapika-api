@@ -36,7 +36,7 @@ module.exports = function(app) {
     client.setPosition(lat, lng);
     client.init()
     .then(() => {
-      var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 5);
+      var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 3);
 
       return bluebird
         .resolve(client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0)))
