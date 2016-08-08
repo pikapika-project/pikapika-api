@@ -22,7 +22,6 @@ module.exports = function(app) {
       return;
     }
 
-    const google = new pogobuf.GoogleLogin();
     let client = pogobuf.Client();
 
     let pokemons = [];
