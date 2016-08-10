@@ -23,9 +23,7 @@ module.exports = function(app) {
     }
 
     let client = pogobuf.Client();
-
     let pokemons = [];
-    let now;
 
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
@@ -45,11 +43,12 @@ module.exports = function(app) {
         .each(cell => {
           return bluebird.resolve(cell.wild_pokemons)
             .each(pokemon => {
-              now = new Date();
 
-              if (!isExist(pokemons, pokemon)) {
+              if (!isExist(pokemons, pokemon) && pokemon.time_till_hidden_ms > 0) {
+                last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
+
                 pokemons.push({
-                  id:       pokemon.spawn_point_id,
+                  id:       pokemon.encounter_id.toString(),
                   number:   pokemon.pokemon_data.pokemon_id,
                   name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
                   position: new GeoPoint({
@@ -57,8 +56,8 @@ module.exports = function(app) {
                     lng: pokemon.longitude
                   }),
                   timeleft:  pokemon.time_till_hidden_ms,
-                  createdAt: now,
-                  expireAt:  new Date(now.getTime() + pokemon.time_till_hidden_ms)
+                  createdAt: new Date(last_modified_timestamp_ms),
+                  expireAt:  new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms)
                 });
               }
           });
