@@ -85,11 +85,13 @@ module.exports = function(app) {
             }
           }
 
-          Pokemon.create(pokemons, function(err, obj) {
-            res.json({
-              data:        pokemons,
-              data_length: pokemons.length
-            });
+          for (let i = 0; i < pokemons.length; i++) {
+            Pokemon.upsert(pokemons[i]);
+          }
+
+          res.json({
+            data:        pokemons,
+            data_length: pokemons.length
           });
         });
       })
