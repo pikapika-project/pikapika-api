@@ -43,7 +43,6 @@ module.exports = function(app) {
         .each(cell => {
           return bluebird.resolve(cell.wild_pokemons)
             .each(pokemon => {
-
               if (!isExist(pokemons, pokemon)) {
                 last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 

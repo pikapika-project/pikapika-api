@@ -34,7 +34,7 @@
     },
     "expireAt": {
       "type": "Date",
-      "required": true
+      "required": false
     }
   },
   "validations": [],
