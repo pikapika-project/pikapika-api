@@ -44,7 +44,7 @@ module.exports = function(app) {
           return bluebird.resolve(cell.wild_pokemons)
             .each(pokemon => {
 
-              if (!isExist(pokemons, pokemon) && pokemon.time_till_hidden_ms > 0) {
+              if (!isExist(pokemons, pokemon)) {
                 last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
                 pokemons.push({
@@ -57,7 +57,7 @@ module.exports = function(app) {
                   }),
                   timeleft:  pokemon.time_till_hidden_ms,
                   createdAt: new Date(last_modified_timestamp_ms),
-                  expireAt:  new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms)
+                  expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
                 });
               }
           });
