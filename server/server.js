@@ -28,6 +28,7 @@ boot(app, __dirname, function(err) {
 
   if (cluster.isMaster) {
     // Fork workers.
+    console.log("Creating ", numCPUs, " workers...")
     for (var i = 0; i < numCPUs; i++) {
       cluster.fork();
     }
