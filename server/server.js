@@ -26,16 +26,22 @@ boot(app, __dirname, function(err) {
   if (err) throw err;
 
 
-  if (cluster.isMaster) {
-    // Fork workers.
-    console.log("Creating ", numCPUs, " workers...")
-    for (var i = 0; i < numCPUs; i++) {
-      cluster.fork();
-    }
+  if (process.env.NODE_ENV === "production") {
+    if (cluster.isMaster) {
+      // Fork workers.
+      console.log("Creating", numCPUs, "workers...")
+      for (var i = 0; i < numCPUs; i++) {
+        cluster.fork();
+      }
 
-    cluster.on('exit', (worker, code, signal) => {
-      console.log(`worker ${worker.process.pid} died`);
-    });
+      cluster.on('exit', (worker, code, signal) => {
+        console.log(`worker ${worker.process.pid} died`);
+      });
+    } else {
+      // start the server if `$ node server.js`
+      if (require.main === module)
+        app.start();
+    }
   } else {
     // start the server if `$ node server.js`
     if (require.main === module)
