@@ -27,6 +27,8 @@ module.exports = function(app) {
       return;
     }
 
+    console.log("Using old heartbeat function")
+
     let qs = [];
     let pokemons = [];
     let stepSize = 0.0015;
@@ -64,7 +66,7 @@ module.exports = function(app) {
                 for (let x = 0; x < response[i].map_cells[a].wild_pokemons.length; x++) {
                   pokemon = response[i].map_cells[a].wild_pokemons[x];
 
-                  if (!isExist(pokemons, pokemon) && pokemon.time_till_hidden_ms > 0) {
+                  if (!isExist(pokemons, pokemon)) {
                     last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
                     pokemons.push({
@@ -77,7 +79,7 @@ module.exports = function(app) {
                       }),
                       timeleft:  pokemon.time_till_hidden_ms,
                       createdAt: new Date(last_modified_timestamp_ms),
-                      expireAt:  new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms)
+                      expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
                     });
                   }
                 }
