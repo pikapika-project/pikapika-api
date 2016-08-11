@@ -3,6 +3,10 @@ var boot = require('loopback-boot');
 
 var app = module.exports = loopback();
 
+const cluster = require('cluster');
+const http = require('http');
+const numCPUs = require('os').cpus().length;
+
 app.start = function() {
   // start the web server
   return app.listen(function() {
@@ -22,7 +26,18 @@ boot(app, __dirname, function(err) {
   if (err) throw err;
 
 
-  // start the server if `$ node server.js`
-  if (require.main === module)
-    app.start();
+  if (cluster.isMaster) {
+    // Fork workers.
+    for (var i = 0; i < numCPUs; i++) {
+      cluster.fork();
+    }
+
+    cluster.on('exit', (worker, code, signal) => {
+      console.log(`worker ${worker.process.pid} died`);
+    });
+  } else {
+    // start the server if `$ node server.js`
+    if (require.main === module)
+      app.start();
+  }
 });
