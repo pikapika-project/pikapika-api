@@ -63,10 +63,11 @@ module.exports = function(app) {
         });
       })
       .then(() => {
+        var start = Date.now();
         for (let i = 0; i < pokemons.length; i++) {
           Pokemon.upsert(pokemons[i]);
         }
-
+        console.log("Inserting in the DB in", Date.now() - start, "ms")
         res.json({
           data:        pokemons,
           data_length: pokemons.length
