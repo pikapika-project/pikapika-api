@@ -1,4 +1,3 @@
-var PokemonGO = require('pokemon-go-node-api');
 
 module.exports = function(app) {
 
@@ -9,13 +8,16 @@ module.exports = function(app) {
   function doLogin(req, res) {
 
     if (!req.body || !req.body.device_unique_id || !req.body.provider) {
-      res.status(404).json({
-        error: {
-          statusCode :    404,
-          statusMessage : "Missing parameters."
-        }
-      });
-      return;
+      res
+        .status(404)
+        .json({
+          error: {
+            statusCode :    404,
+            statusMessage : "Missing parameters."
+          }
+        });
+
+        return;
     }
 
     var filter = {
