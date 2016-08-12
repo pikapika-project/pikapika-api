@@ -27,6 +27,7 @@ module.exports = function(app) {
     }
 
     console.log("Heartbeat request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
+    let startReq = new Date();
 
     let pokemons = [];
     let lat = parseFloat(req.params.lat);
@@ -44,11 +45,14 @@ module.exports = function(app) {
     client
       .init()
       .then(() => {
+        console.log(req.headers['cf-ipcountry'], "[1]:", new Date() - startReq, "ms");
         let cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 3);
+        console.log(req.headers['cf-ipcountry'], "[2]:", new Date() - startReq, "ms");
 
         return bluebird
           .resolve(client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0)))
           .then(mapObjects => {
+            console.log(req.headers['cf-ipcountry'], "[3]:", new Date() - startReq, "ms");
             return mapObjects.map_cells;
           })
           .each(cell => {
@@ -76,6 +80,7 @@ module.exports = function(app) {
           });
         })
         .then(() => {
+          console.log(req.headers['cf-ipcountry'], "[4]:", new Date() - startReq, "ms");
           res.json({
             data:        pokemons,
             data_length: pokemons.length
