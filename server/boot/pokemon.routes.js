@@ -26,7 +26,7 @@ module.exports = function(app) {
       return;
     }
 
-    console.log("Heartbeat request from", req.headers.['cf-ipcountry'], "(", req.headers.['cf-connecting-ip'], ")");
+    console.log("Heartbeat request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
     let pokemons = [];
     let lat = parseFloat(req.params.lat);
