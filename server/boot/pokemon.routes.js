@@ -26,6 +26,8 @@ module.exports = function(app) {
       return;
     }
 
+    console.log("Heartbeat request from", req.headers.['cf-ipcountry'], "(", req.headers.['cf-connecting-ip'], ")");
+
     let pokemons = [];
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
@@ -42,7 +44,7 @@ module.exports = function(app) {
     client
       .init()
       .then(() => {
-        var cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 3);
+        let cellIDs = pogobuf.Utils.getCellIDs(lat, lng, 3);
 
         return bluebird
           .resolve(client.getMapObjects(cellIDs, Array(cellIDs.length).fill(0)))
@@ -55,7 +57,7 @@ module.exports = function(app) {
               .each(pokemon => {
                 last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
-                pokemons.push({
+                let p = {
                   id:       pokemon.encounter_id.toString(),
                   number:   pokemon.pokemon_data.pokemon_id,
                   name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
@@ -66,22 +68,21 @@ module.exports = function(app) {
                   timeleft:  pokemon.time_till_hidden_ms,
                   createdAt: new Date(last_modified_timestamp_ms),
                   expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
-                });
+                };
+
+                pokemons.push(p);
+                Pokemon.upsert(p);
             });
           });
         })
         .then(() => {
-          // Insert all scanned pokemons in db
-          for (let i = 0; i < pokemons.length; i++) {
-            Pokemon.upsert(pokemons[i]);
-          }
-
           res.json({
             data:        pokemons,
             data_length: pokemons.length
           });
         })
         .catch(err => {
+          console.log(err);
           res.json({error: err});
         });
   }
