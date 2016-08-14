@@ -55,23 +55,25 @@ module.exports = function(app) {
             return bluebird
               .resolve(cell.wild_pokemons)
               .each(pokemon => {
-                last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
+                if (pokemon.time_till_hidden_ms < 0 || (pokemon.time_till_hidden_ms > 0 && pokemon.time_till_hidden_ms.length < 7)) {
+                  last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
-                let p = {
-                  id:       pokemon.encounter_id.toString(),
-                  number:   pokemon.pokemon_data.pokemon_id,
-                  name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
-                  position: new GeoPoint({
-                    lat: pokemon.latitude,
-                    lng: pokemon.longitude
-                  }),
-                  timeleft:  pokemon.time_till_hidden_ms,
-                  createdAt: new Date(last_modified_timestamp_ms),
-                  expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
-                };
+                  let p = {
+                    id:       pokemon.encounter_id.toString(),
+                    number:   pokemon.pokemon_data.pokemon_id,
+                    name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
+                    position: new GeoPoint({
+                      lat: pokemon.latitude,
+                      lng: pokemon.longitude
+                    }),
+                    timeleft:  pokemon.time_till_hidden_ms,
+                    createdAt: new Date(last_modified_timestamp_ms),
+                    expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
+                  };
 
-                pokemons.push(p);
-                Pokemon.upsert(p);
+                  pokemons.push(p);
+                  Pokemon.upsert(p);
+                }
             });
           });
         })
