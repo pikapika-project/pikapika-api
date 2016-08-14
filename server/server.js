@@ -26,7 +26,7 @@ boot(app, __dirname, function(err) {
   if (err) throw err;
 
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV === "productionn") {
     if (cluster.isMaster) {
       // Fork workers.
       console.log("Creating", numCPUs, "workers...")
