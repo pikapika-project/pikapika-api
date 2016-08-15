@@ -55,7 +55,7 @@ module.exports = function(app) {
             return bluebird
               .resolve(cell.wild_pokemons)
               .each(pokemon => {
-                if (pokemon.time_till_hidden_ms < 0 || (pokemon.time_till_hidden_ms > 0 && pokemon.time_till_hidden_ms.length < 7)) {
+                if (pokemon.time_till_hidden_ms < 0 || (pokemon.time_till_hidden_ms > 0 && pokemon.time_till_hidden_ms.toString().length < 7)) {
                   last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
                   let p = {
