@@ -37,6 +37,12 @@ module.exports = function(app) {
       alt = parseFloat(req.params.alt);
     }
 
+    // ONLY FOR DEBUG
+    // const google = new pogobuf.GoogleLogin();
+    // google.login("poketests42@gmail.com", "piripepiripe").then(token => {
+    //   console.log(token)
+    // });
+
     let client = pogobuf.Client();
 
     client.setAuthInfo('google', req.query.access_token);
