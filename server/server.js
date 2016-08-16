@@ -35,7 +35,8 @@ boot(app, __dirname, function(err) {
       }
 
       cluster.on('exit', (worker, code, signal) => {
-        console.log(`worker ${worker.process.pid} died`);
+        console.log(`Worker ${worker.process.pid} died. Starting a new worker...`);
+        cluster.fork();
       });
     } else {
       // start the server if `$ node server.js`

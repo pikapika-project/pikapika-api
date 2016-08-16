@@ -124,6 +124,8 @@ module.exports = function(app) {
         return;
     }
 
+    console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
+
     var radiusFilter = {
       where: {
         expireAt: {
