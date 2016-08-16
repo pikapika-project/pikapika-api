@@ -47,6 +47,7 @@ module.exports = function(app) {
 
     client.setAuthInfo('google', req.query.access_token);
     client.setPosition(lat, lng);
+    client.setAutomaticLongConvertingEnabled(false);
     client
       .init()
       .then(() => {
