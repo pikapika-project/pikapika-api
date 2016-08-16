@@ -5,7 +5,7 @@ var app = module.exports = loopback();
 
 const cluster = require('cluster');
 const http = require('http');
-const numCPUs = require('os').cpus().length;
+const numCPUs = require('os').cpus().length - 1;
 
 app.start = function() {
   // start the web server
@@ -30,7 +30,7 @@ boot(app, __dirname, function(err) {
     if (cluster.isMaster) {
       // Fork workers.
       console.log("Creating", numCPUs, "workers...")
-      for (var i = 0; i < (numCPUs - 1); i++) {
+      for (var i = 0; i < numCPUs; i++) {
         cluster.fork();
       }
 
