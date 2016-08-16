@@ -26,11 +26,11 @@ boot(app, __dirname, function(err) {
   if (err) throw err;
 
 
-  if (process.env.NODE_ENV === "productionn") {
+  if (process.env.NODE_ENV === "production") {
     if (cluster.isMaster) {
       // Fork workers.
       console.log("Creating", numCPUs, "workers...")
-      for (var i = 0; i < numCPUs; i++) {
+      for (var i = 0; i < (numCPUs - 1); i++) {
         cluster.fork();
       }
 
