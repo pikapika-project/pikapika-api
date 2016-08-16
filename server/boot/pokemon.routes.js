@@ -143,7 +143,7 @@ module.exports = function(app) {
       if (!nearbyPokemon) {
         nearbyPokemon = [];
       }
-
+      console.log("\t returning", nearbyPokemon.length, "pokemon");
       res.json({
         data:        nearbyPokemon,
         data_length: nearbyPokemon.length
