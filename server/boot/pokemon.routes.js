@@ -138,6 +138,10 @@ module.exports = function(app) {
     }
 
     Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
+      if (!nearbyPokemon) {
+        nearbyPokemon = [];
+      }
+
       res.json({
         data:        nearbyPokemon,
         data_length: nearbyPokemon.length
