@@ -83,15 +83,13 @@ module.exports = function(app) {
         })
         .then(() => {
           if (pokemons.length) {
-            let filter = {
-              where: {
-                _id: {
-                  inq: pokemons.map(function(p) { return p.id; })
-                }
+            let where = {
+              _id: {
+                inq: pokemons.map(function(p) { return p.id; })
               }
             };
 
-            Pokemon.destroyAll(filter, function(err, info) {
+            Pokemon.destroyAll(where, function(err, info) {
               if (err) {
                 console.log(err);
               }
