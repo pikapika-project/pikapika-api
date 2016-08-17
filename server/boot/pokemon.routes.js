@@ -158,9 +158,6 @@ module.exports = function(app) {
 
     var radiusFilter = {
       where: {
-        expireAt: {
-          gt:          new Date().toISOString()
-        },
         position: {
           near:        new GeoPoint({lat: req.params.lat , lng: req.params.lng}),
           maxDistance: req.query.radius || 2000,
