@@ -1,0 +1,44 @@
+{
+  "name": "pokemon-spawn",
+  "settings": {
+    "mongodb": {
+      "allowExtendedOperators": true
+    }
+  },
+  "plural": "pokemon-spawns",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "number": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "position": {
+      "type": "GeoPoint",
+      "required": true
+    },
+    "timeleft": {
+      "type": "string",
+      "required": true
+    },
+    "createdAt": {
+      "type": "Date",
+      "required": true
+    },
+    "expireAt": {
+      "type": "Date",
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
