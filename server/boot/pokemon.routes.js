@@ -85,7 +85,7 @@ module.exports = function(app) {
 
           let filter = {
             where: {
-              id: {
+              _id: {
                 inq: pokemons.map(function(p) { return p.id; })
               }
             }
