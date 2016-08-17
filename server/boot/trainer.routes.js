@@ -1,7 +1,7 @@
 
 module.exports = function(app) {
 
-  Trainer = app.models.trainer;
+  Trainer = app.models.Trainer;
 
   app.post('/trainers/login', doLogin);
 

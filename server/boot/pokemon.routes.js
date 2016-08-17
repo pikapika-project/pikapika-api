@@ -5,7 +5,8 @@ const pogobuf  = require('pogobuf'),
 
 module.exports = function(app) {
 
-  Pokemon = app.models.pokemon;
+  Pokemon      = app.models.Pokemon;
+  PokemonSpawn = app.models.PokemonSpawn;
 
   app.get('/pokemons/:lat/:lng/heartbeat',         getHeartbeat); // Use heartbeat v2
   app.get('/v2/pokemons/:lat/:lng/:alt/heartbeat', getHeartbeat);
@@ -38,9 +39,9 @@ module.exports = function(app) {
     }
 
     // ONLY FOR DEBUG
-    // const google = new pogobuf.GoogleLogin();
-    // google.login("poketests42@gmail.com", "piripepiripe").then(token => {
-    //   console.log(token)
+    // const account = new pogobuf.GoogleLogin();
+    // account.login("pikapikatests42@gmail.com", "piripepiripe").then(token => {
+    //   console.log(token);
     // });
 
     let client = pogobuf.Client();
@@ -95,6 +96,18 @@ module.exports = function(app) {
               }
 
               Pokemon.create(pokemons, function (err, obj) {
+                if (err) {
+                  console.log(err);
+                }
+              });
+            });
+
+            PokemonSpawn.destroyAll(where, function(err, info) {
+              if (err) {
+                console.log(err);
+              }
+
+              PokemonSpawn.create(pokemons, function (err, obj) {
                 if (err) {
                   console.log(err);
                 }

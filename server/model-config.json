@@ -20,5 +20,9 @@
   "pokemon": {
     "dataSource": "mongo",
     "public": true
+  },
+  "pokemon-spawn": {
+    "dataSource": "mongo",
+    "public": true
   }
 }
