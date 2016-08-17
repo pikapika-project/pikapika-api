@@ -82,26 +82,27 @@ module.exports = function(app) {
           });
         })
         .then(() => {
-
-          let filter = {
-            where: {
-              _id: {
-                inq: pokemons.map(function(p) { return p.id; })
+          if (pokemons.length) {
+            let filter = {
+              where: {
+                _id: {
+                  inq: pokemons.map(function(p) { return p.id; })
+                }
               }
-            }
-          };
+            };
 
-          Pokemon.destroyAll(filter, function(err, info) {
-            if (err) {
-              console.log(err);
-            }
-
-            Pokemon.create(pokemons, function (err, obj) {
+            Pokemon.destroyAll(filter, function(err, info) {
               if (err) {
                 console.log(err);
               }
+
+              Pokemon.create(pokemons, function (err, obj) {
+                if (err) {
+                  console.log(err);
+                }
+              });
             });
-          });
+          }
 
           res.json({
             data:        pokemons,
