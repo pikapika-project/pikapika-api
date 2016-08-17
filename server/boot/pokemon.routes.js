@@ -65,7 +65,7 @@ module.exports = function(app) {
                 if (pokemon.time_till_hidden_ms < 0 || (pokemon.time_till_hidden_ms > 0 && pokemon.time_till_hidden_ms.toString().length < 7)) {
                   last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
-                  let p = {
+                  pokemons.push({
                     id:       pokemon.encounter_id.toString(),
                     number:   pokemon.pokemon_data.pokemon_id,
                     name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
@@ -76,15 +76,33 @@ module.exports = function(app) {
                     timeleft:  pokemon.time_till_hidden_ms,
                     createdAt: new Date(last_modified_timestamp_ms),
                     expireAt:  (pokemon.time_till_hidden_ms > 0) ? new Date(last_modified_timestamp_ms + pokemon.time_till_hidden_ms) : null
-                  };
-
-                  pokemons.push(p);
-                  Pokemon.upsert(p);
+                  });
                 }
             });
           });
         })
         .then(() => {
+
+          let filter = {
+            where: {
+              id: {
+                inq: pokemons.map(function(p) { return p.id; })
+              }
+            }
+          };
+
+          Pokemon.destroyAll(filter, function(err, info) {
+            if (err) {
+              console.log(err);
+            }
+
+            Pokemon.create(pokemons, function (err, obj) {
+              if (err) {
+                console.log(err);
+              }
+            });
+          });
+
           res.json({
             data:        pokemons,
             data_length: pokemons.length
