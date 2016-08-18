@@ -1,7 +1,8 @@
 const pogobuf  = require('pogobuf'),
     POGOProtos = require('node-pogo-protos'),
     bluebird   = require('bluebird'),
-    GeoPoint   = require('loopback').GeoPoint;
+    GeoPoint   = require('loopback').GeoPoint,
+    crypto     = require('crypto');
 
 module.exports = function(app) {
 
@@ -66,8 +67,10 @@ module.exports = function(app) {
                 if (pokemon.time_till_hidden_ms < 0 || (pokemon.time_till_hidden_ms > 0 && pokemon.time_till_hidden_ms.toString().length < 7)) {
                   last_modified_timestamp_ms = pokemon.last_modified_timestamp_ms.toNumber();
 
+                  // generate an id with encounter_id and spawn_point_id to be sure it's unique in the database
+                  let genId = crypto.createHash('md5').update(pokemon.encounter_id.toString() + pokemon.spawn_point_id).digest("hex");
                   pokemons.push({
-                    id:       pokemon.encounter_id.toString(),
+                    id:       genId,
                     number:   pokemon.pokemon_data.pokemon_id,
                     name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_data.pokemon_id),
                     position: new GeoPoint({
