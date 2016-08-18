@@ -86,6 +86,11 @@ module.exports = function(app) {
           });
         })
         .then((cells) => {
+          res.json({
+            data:        pokemons,
+            data_length: pokemons.length
+          });
+
           if (pokemons.length) {
             let where = {
               _id: {
@@ -97,7 +102,6 @@ module.exports = function(app) {
               if (err) {
                 console.log(err);
               }
-
               Pokemon.create(pokemons, function (err, obj) {
                 if (err) {
                   console.log(err);
@@ -109,7 +113,6 @@ module.exports = function(app) {
               if (err) {
                 console.log(err);
               }
-
               PokemonSpawn.create(pokemons, function (err, obj) {
                 if (err) {
                   console.log(err);
@@ -117,12 +120,6 @@ module.exports = function(app) {
               });
             });
           }
-        })
-        .then(() => {
-          res.json({
-            data:        pokemons,
-            data_length: pokemons.length
-          });
         })
         .catch(err => {
           console.log(err);
