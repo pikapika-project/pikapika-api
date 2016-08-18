@@ -82,7 +82,7 @@ module.exports = function(app) {
             });
           });
         })
-        .then(() => {
+        .then((cells) => {
           if (pokemons.length) {
             let where = {
               _id: {
@@ -114,7 +114,8 @@ module.exports = function(app) {
               });
             });
           }
-
+        })
+        .then(() => {
           res.json({
             data:        pokemons,
             data_length: pokemons.length
