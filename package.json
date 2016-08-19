@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server/server.js",
   "scripts": {
-    "start": "node --max_old_space_size=4096 .",
+    "start": "node .",
     "dev": "nodemon server/server.js --watch server --watch common --ext js,json ",
     "pretest": "jshint .",
     "posttest": "nsp check"
