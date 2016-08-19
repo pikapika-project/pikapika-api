@@ -21,14 +21,6 @@
     "dataSource": "mongo",
     "public": false
   },
-  "RoleMapping": {
-    "dataSource": "mongo",
-    "public": false
-  },
-  "Role": {
-    "dataSource": "mongo",
-    "public": false
-  },
   "trainer": {
     "dataSource": "mongo",
     "public": true
