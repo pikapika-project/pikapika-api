@@ -5,7 +5,7 @@ var app = module.exports = loopback();
 
 const cluster = require('cluster');
 const http = require('http');
-const numCPUs = require('os').cpus().length - 1;
+const numCPUs = require('os').cpus().length;
 
 app.start = function() {
   // start the web server
