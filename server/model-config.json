@@ -13,6 +13,14 @@
       "./mixins"
     ]
   },
+  "AccessToken": {
+    "dataSource": "mongo",
+    "public": false
+  },
+  "ACL": {
+    "dataSource": "mongo",
+    "public": false
+  },
   "trainer": {
     "dataSource": "mongo",
     "public": true

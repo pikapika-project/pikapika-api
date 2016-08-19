@@ -9,6 +9,7 @@
     "posttest": "nsp check"
   },
   "dependencies": {
+    "bluebird": "^3.4.1",
     "body-parser": "^1.15.2",
     "bytebuffer": "^5.0.1",
     "compression": "^1.0.3",
@@ -21,6 +22,7 @@
     "loopback-component-explorer": "^2.4.0",
     "loopback-connector-mongodb": "^1.15.2",
     "loopback-datasource-juggler": "^2.39.0",
+    "node-pogo-protos": "^1.3.0",
     "nodemon": "^1.9.2",
     "pogobuf": "^1.5.0",
     "serve-favicon": "^2.0.1"
