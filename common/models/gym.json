@@ -1,0 +1,32 @@
+{
+  "name": "gym",
+  "settings": {
+    "mongodb": {
+      "allowExtendedOperators": true
+    }
+  },
+  "plural": "gyms",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "position": {
+      "type": "GeoPoint",
+      "required": true
+    },
+    "ownedBy": {
+      "type": "String",
+      "required": true
+    },
+    "createdAt": {
+      "type": "Date",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

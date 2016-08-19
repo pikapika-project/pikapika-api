@@ -8,6 +8,7 @@ module.exports = function(app) {
 
   Pokemon      = app.models.Pokemon;
   PokemonSpawn = app.models.PokemonSpawn;
+  Gym          = app.models.Gym;
 
   app.get('/pokemons/:lat/:lng/heartbeat',         getHeartbeat); // Use heartbeat v2
   app.get('/v2/pokemons/:lat/:lng/:alt/heartbeat', getHeartbeat);
@@ -31,6 +32,7 @@ module.exports = function(app) {
     console.log("Heartbeat request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
     let pokemons = [];
+    let gyms     = [];
     let lat = parseFloat(req.params.lat);
     let lng = parseFloat(req.params.lng);
     let alt = 0;
@@ -83,6 +85,24 @@ module.exports = function(app) {
                   });
                 }
             });
+          })
+          .each(cell => {
+            return bluebird
+              .resolve(cell.forts)
+              .each(fort => {
+                // Only get gyms
+                if (fort.type === 0 && fort.enabled === true) {
+                  gyms.push({
+                    id:       fort.id,
+                    position: new GeoPoint({
+                      lat: fort.latitude,
+                      lng: fort.longitude
+                    }),
+                    ownedBy:   fort.owned_by_team,
+                    createdAt: new Date(fort.last_modified_timestamp_ms.toNumber())
+                  });
+                }
+              });
           });
         })
         .then((cells) => {
@@ -114,6 +134,25 @@ module.exports = function(app) {
                 console.log(err);
               }
               PokemonSpawn.create(pokemons, function (err, obj) {
+                if (err) {
+                  console.log(err);
+                }
+              });
+            });
+          }
+
+          if (gyms.length) {
+            let where = {
+              _id: {
+                inq: gyms.map(function(g) { return g.id; })
+              }
+            };
+
+            Gym.destroyAll(where, function(err, info) {
+              if (err) {
+                console.log(err);
+              }
+              Gym.create(gyms, function (err, obj) {
                 if (err) {
                   console.log(err);
                 }

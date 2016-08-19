@@ -32,5 +32,9 @@
   "pokemon-spawn": {
     "dataSource": "mongo",
     "public": true
+  },
+  "gym": {
+    "dataSource": "mongo",
+    "public": true
   }
 }
