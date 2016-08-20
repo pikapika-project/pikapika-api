@@ -36,5 +36,9 @@
   "gym": {
     "dataSource": "mongo",
     "public": true
+  },
+  "ios-beta": {
+    "dataSource": "mongo",
+    "public": true
   }
 }
