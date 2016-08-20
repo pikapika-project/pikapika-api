@@ -112,6 +112,7 @@ module.exports = function(app) {
           });
 
           if (pokemons.length) {
+            console.log(pokemons.length, "pokemon scanned");
             let where = {
               _id: {
                 inq: pokemons.map(function(p) { return p.id; })
