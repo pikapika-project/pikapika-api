@@ -1,15 +1,15 @@
 {
   "name": "pokemon",
-  "settings": {
-    "mongodb": {
-      "allowExtendedOperators": true
-    }
-  },
   "plural": "pokemons",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
+  },
+  "settings": {
+    "mongodb": {
+      "allowExtendedOperators": true
+    }
   },
   "properties": {
     "number": {

@@ -1,15 +1,15 @@
 {
   "name": "pokemon-spawn",
-  "settings": {
-    "mongodb": {
-      "allowExtendedOperators": true
-    }
-  },
   "plural": "pokemon-spawns",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
+  },
+  "settings": {
+    "mongodb": {
+      "allowExtendedOperators": true
+    }
   },
   "properties": {
     "number": {
