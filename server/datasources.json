@@ -4,12 +4,10 @@
     "connector": "memory"
   },
   "mongo": {
-    "host": "167.114.246.236",
-    "port": 27017,
-    "database": "pikapika",
-    "username": "pikapika-api",
-    "password": "R42cdJqXU6B6yfp42V",
     "name": "mongo",
-    "connector": "mongodb"
+    "connector": "mongodb",
+    "host": "127.0.0.1",
+    "port": 27017,
+    "database": "pikapika"
   }
 }
