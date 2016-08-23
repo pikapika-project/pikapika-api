@@ -6,8 +6,6 @@
   "mongo": {
     "name": "mongo",
     "connector": "mongodb",
-    "host": "127.0.0.1",
-    "port": 27017,
-    "database": "pikapika"
+    "url": "mongodb://127.0.0.1/pikapika?maxPoolSize=1000"
   }
 }

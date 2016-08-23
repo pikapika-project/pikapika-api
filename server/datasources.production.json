@@ -6,10 +6,6 @@
   "mongo": {
     "name": "mongo",
     "connector": "mongodb",
-    "host": "167.114.246.236",
-    "port": 27017,
-    "username": "pikapika-api",
-    "password": "R42cdJqXU6B6yfp42V",
-    "database": "pikapika"
+    "url": "mongodb://pikapika-api:R42cdJqXU6B6yfp42V@167.114.246.236/pikapika?maxPoolSize=1000"
   }
 }
