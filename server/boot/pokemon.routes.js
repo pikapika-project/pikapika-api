@@ -197,15 +197,6 @@ module.exports = function(app) {
 
     console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
-    // TEMP FIX
-    var nearbyPokemon = [];
-    res.json({
-      data:        nearbyPokemon,
-      data_length: nearbyPokemon.length
-    });
-    return;
-    // TEMP FIX
-
     var radiusFilter = {
       where: {
         position: {
