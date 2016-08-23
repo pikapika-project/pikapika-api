@@ -6,6 +6,7 @@
   "mongo": {
     "name": "mongo",
     "connector": "mongodb",
-    "url": "mongodb://pikapika-api:R42cdJqXU6B6yfp42V@167.114.246.236/pikapika?maxPoolSize=1000"
+    "url": "mongodb://pikapika-api:R42cdJqXU6B6yfp42V@167.114.246.236/pikapika?maxPoolSize=1000",
+    "enableGeoIndexing": true
   }
 }
