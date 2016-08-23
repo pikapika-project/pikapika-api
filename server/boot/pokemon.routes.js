@@ -200,12 +200,13 @@ module.exports = function(app) {
     var radiusFilter = {
       where: {
         position: {
-          near:        new GeoPoint({lat: req.params.lat , lng: req.params.lng}),
+          near:        new GeoPoint({lat: req.params.lat, lng: req.params.lng}),
           maxDistance: req.query.radius || 2000,
           unit:        'meters'
         }
-      }
-    }
+      },
+      limit: 100 // maxDistance doesn't seems to work
+    };
 
     Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
       if (!nearbyPokemon) {
