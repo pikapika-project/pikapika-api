@@ -142,7 +142,7 @@ module.exports = function(app) {
             });
           }
 
-          /*if (gyms.length) {
+          if (gyms.length) {
             let where = {
               _id: {
                 inq: gyms.map(function(g) { return g.id; })
@@ -159,7 +159,7 @@ module.exports = function(app) {
                 }
               });
             });
-          }*/
+          }
         })
         .catch(err => {
           console.log(err);
