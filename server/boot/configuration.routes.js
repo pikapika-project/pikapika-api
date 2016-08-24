@@ -10,7 +10,7 @@ module.exports = function(app) {
         android: "1.0.2"
       },
       ads: {
-        reload_number: 5
+        reload_number: 4
       },
       apk_url: "https://pikapika.io/pikapika-v120.apk"
     };
