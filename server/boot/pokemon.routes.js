@@ -196,7 +196,26 @@ module.exports = function(app) {
             }
           }
 
-          console.log(pokes)
+          if (pokes.length) {
+            console.log(pokes)
+
+            let where = {
+              _id: {
+                inq: pokes.map(function(p) { return p.id; })
+              }
+            };
+
+            Pokemon.destroyAll(where, function(err, info) {
+              if (err) {
+                console.log(err);
+              }
+              Pokemon.create(pokes, function (err, obj) {
+                if (err) {
+                  console.log(err);
+                }
+              });
+            });
+          }
         }
       });
   }
