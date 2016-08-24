@@ -42,6 +42,10 @@ module.exports = function(app) {
       alt = parseFloat(req.params.alt);
     }
 
+    // Pre fill heartbeat result with concurrent api's
+    pokemons = stealPokemon();
+    //console.log(stealPokemon());
+
     // ONLY FOR DEBUG
     // const account = new pogobuf.GoogleLogin();
     // account.login("pikapikatests42@gmail.com", "piripepiripe").then(token => {
@@ -166,58 +170,6 @@ module.exports = function(app) {
           console.log(err);
           res.json({error: err});
         });
-
-      let pokes = [];
-      let pokeradarApiUrl = 'https://www.pokeradar.io/api/v1/submissions?deviceId=ca11289067c111e683fded3caa33a25e&minLatitude=20.668002834302406&maxLatitude=20.673985568266033&minLongitude=-103.37415933609009&maxLongitude=-103.36031913757324&pokemonId=0';
-
-      request(pokeradarApiUrl, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-          body = JSON.parse(body);
-
-          for (var i = 0; i < body.data.length; i++) {
-            let pokemon = body.data[i];
-
-            if (pokemon.trainerName === '(Poke Radar Prediction)') {
-              pokemon.created *= 1000; // convert sec to ms
-
-              let genId = crypto.createHash('md5').update(pokemon.id).digest("hex");
-              pokes.push({
-                id:       genId,
-                number:   pokemon.pokemonId,
-                name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemonId),
-                position: new GeoPoint({
-                  lat: pokemon.latitude,
-                  lng: pokemon.longitude
-                }),
-                timeleft:  900000, // 15min
-                createdAt: new Date(pokemon.created),
-                expireAt: new Date(pokemon.created + 900000)
-              });
-            }
-          }
-
-          if (pokes.length) {
-            console.log(pokes)
-
-            let where = {
-              _id: {
-                inq: pokes.map(function(p) { return p.id; })
-              }
-            };
-
-            Pokemon.destroyAll(where, function(err, info) {
-              if (err) {
-                console.log(err);
-              }
-              Pokemon.create(pokes, function (err, obj) {
-                if (err) {
-                  console.log(err);
-                }
-              });
-            });
-          }
-        }
-      });
   }
 
   function getPokemon(req, res, next) {
@@ -271,5 +223,62 @@ module.exports = function(app) {
     });
   }
 
+  function stealPokemon() {
+    let pokemons = [];
+    //let pokeradarApiUrl = 'https://www.pokeradar.io/api/v1/submissions?deviceId=ca11289067c111e683fded3caa33a25e&minLatitude=20.668002834302406&maxLatitude=20.673985568266033&minLongitude=-103.37415933609009&maxLongitude=-103.36031913757324&pokemonId=0';
+    let goradarApiUrl   = 'https://stop_fucking_with_us.goradar.io/raw_data?&swLat=20.651008&swLng=-103.382146&neLat=20.689576&neLng=-103.356511&pokemon=true&pokestops=false&gyms=false'
+    // TODO: generate square lat and lng
+
+    request(goradarApiUrl, function (error, response, body) {
+      if (error || response.statusCode !== 200) {
+        return pokemons;
+      }
+
+      body = JSON.parse(body);
+
+      for (var i = 0; i < body.pokemons.length; i++) {
+        let pokemon = body.pokemons[i];
+
+        let genId    = crypto.createHash('md5').update(pokemon.encounter_id + pokemon.spawnpoint_id).digest("hex");
+        let now      = new Date();
+        let expireAt = new Date(pokemon.disappear_time);
+
+        pokemons.push({
+          id:       genId,
+          number:   pokemon.pokemon_id,
+          name:     pokemon.pokemon_name,
+          position: new GeoPoint({
+            lat: pokemon.latitude,
+            lng: pokemon.longitude
+          }),
+          timeleft:  expireAt.getTime() - now.getTime(),
+          createdAt: now,
+          expireAt:  expireAt
+        });
+      }
+
+      if (pokemons.length) {
+        let where = {
+          _id: {
+            inq: pokemons.map(function(p) { return p.id; })
+          }
+        };
+
+        Pokemon.destroyAll(where, function(err, info) {
+          if (err) {
+            console.log(err);
+          }
+          Pokemon.create(pokemons, function (err, obj) {
+            if (err) {
+              console.log(err);
+            }
+
+            return pokemons;
+          });
+        });
+      }
+
+    });
+  }
 
 };
