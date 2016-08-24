@@ -2,7 +2,8 @@ const pogobuf  = require('pogobuf'),
     POGOProtos = require('node-pogo-protos'),
     bluebird   = require('bluebird'),
     GeoPoint   = require('loopback').GeoPoint,
-    crypto     = require('crypto');
+    crypto     = require('crypto'),
+    request    = require('request');
 
 module.exports = function(app) {
 
@@ -165,6 +166,39 @@ module.exports = function(app) {
           console.log(err);
           res.json({error: err});
         });
+
+      let pokes = [];
+      let pokeradarApiUrl = 'https://www.pokeradar.io/api/v1/submissions?deviceId=ca11289067c111e683fded3caa33a25e&minLatitude=20.668002834302406&maxLatitude=20.673985568266033&minLongitude=-103.37415933609009&maxLongitude=-103.36031913757324&pokemonId=0';
+
+      request(pokeradarApiUrl, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
+          body = JSON.parse(body);
+
+          for (var i = 0; i < body.data.length; i++) {
+            let pokemon = body.data[i];
+
+            if (pokemon.trainerName === '(Poke Radar Prediction)') {
+              pokemon.created *= 1000; // convert sec to ms
+
+              let genId = crypto.createHash('md5').update(pokemon.id).digest("hex");
+              pokes.push({
+                id:       genId,
+                number:   pokemon.pokemonId,
+                name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemonId),
+                position: new GeoPoint({
+                  lat: pokemon.latitude,
+                  lng: pokemon.longitude
+                }),
+                timeleft:  900000, // 15min
+                createdAt: new Date(pokemon.created),
+                expireAt: new Date(pokemon.created + 900000)
+              });
+            }
+          }
+
+          console.log(pokes)
+        }
+      });
   }
 
   function getPokemon(req, res, next) {
