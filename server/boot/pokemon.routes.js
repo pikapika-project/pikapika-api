@@ -42,10 +42,6 @@ module.exports = function(app) {
       alt = parseFloat(req.params.alt);
     }
 
-    // Pre fill heartbeat result with concurrent api's
-    pokemons = stealPokemon();
-    //console.log(stealPokemon());
-
     // ONLY FOR DEBUG
     // const account = new pogobuf.GoogleLogin();
     // account.login("pikapikatests42@gmail.com", "piripepiripe").then(token => {
@@ -202,36 +198,45 @@ module.exports = function(app) {
 
     console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
-    var radiusFilter = {
-      where: {
-        position: {
-          near:        new GeoPoint({lat: req.params.lat, lng: req.params.lng}),
-          maxDistance: req.query.radius || 2000
+    let lat = Number(req.params.lat);
+    let lng = Number(req.params.lng);
+
+    // Pre fill heartbeat result with concurrent api's
+    pokemons = stealPokemon(lat, lng, function (pokemons) {
+      var radiusFilter = {
+        where: {
+          position: {
+            near:        new GeoPoint({lat: lat, lng: lng}),
+            maxDistance: req.query.radius || 2000
+          }
         }
-      }
-    };
+      };
 
-    Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
-      if (!nearbyPokemon) {
-        nearbyPokemon = [];
-      }
-
-      res.json({
-        data:        nearbyPokemon,
-        data_length: nearbyPokemon.length
+      Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
+        if (!nearbyPokemon) {
+          nearbyPokemon = [];
+        }
+        nearbyPokemon.concat(pokemons)
+        res.json({
+          data:        nearbyPokemon,
+          data_length: nearbyPokemon.length
+        });
       });
     });
   }
 
-  function stealPokemon() {
+  function stealPokemon(lat, lng, cb) {
     let pokemons = [];
-    //let pokeradarApiUrl = 'https://www.pokeradar.io/api/v1/submissions?deviceId=ca11289067c111e683fded3caa33a25e&minLatitude=20.668002834302406&maxLatitude=20.673985568266033&minLongitude=-103.37415933609009&maxLongitude=-103.36031913757324&pokemonId=0';
-    let goradarApiUrl   = 'https://stop_fucking_with_us.goradar.io/raw_data?&swLat=20.651008&swLng=-103.382146&neLat=20.689576&neLng=-103.356511&pokemon=true&pokestops=false&gyms=false'
-    // TODO: generate square lat and lng
+
+    let swLat =  lat - (Math.random() * 0.02);
+    let neLat =  lat + (Math.random() * 0.02);
+    let swLng =  lng - (Math.random() * 0.02);
+    let neLng =  lng + (Math.random() * 0.02);
+    let goradarApiUrl   = `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${swLat}&swLng=${swLng}&neLat=${neLat}&neLng=${neLng}&pokemon=true&pokestops=false&gyms=false`
 
     request(goradarApiUrl, function (error, response, body) {
       if (error || response.statusCode !== 200) {
-        return pokemons;
+        return cb(pokemons);
       }
 
       body = JSON.parse(body);
@@ -273,7 +278,7 @@ module.exports = function(app) {
               console.log(err);
             }
 
-            return pokemons;
+            return cb(pokemons);
           });
         });
       }
