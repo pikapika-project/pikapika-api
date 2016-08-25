@@ -34,12 +34,12 @@ module.exports = function(app) {
 
     let pokemons = [];
     let gyms     = [];
-    let lat = parseFloat(req.params.lat);
-    let lng = parseFloat(req.params.lng);
-    let alt = 0;
+    let lat      = Number(req.params.lat);
+    let lng      = Number(req.params.lng);
+    let alt      = 0;
 
     if (req.params.alt) {
-      alt = parseFloat(req.params.alt);
+      alt = Number(req.params.alt);
     }
 
     // ONLY FOR DEBUG
@@ -114,34 +114,45 @@ module.exports = function(app) {
 
           if (pokemons.length) {
             console.log("\t", pokemons.length, "pokemon scanned");
-            let where = {
-              _id: {
-                inq: pokemons.map(function(p) { return p.id; })
-              }
-            };
-
-            Pokemon.destroyAll(where, function(err, info) {
-              if (err) {
-                console.log(err);
-              }
-              Pokemon.create(pokemons, function (err, obj) {
-                if (err) {
-                  console.log(err);
-                }
-              });
-            });
-
-            PokemonSpawn.destroyAll(where, function(err, info) {
-              if (err) {
-                console.log(err);
-              }
-              PokemonSpawn.create(pokemons, function (err, obj) {
-                if (err) {
-                  console.log(err);
-                }
-              });
-            });
           }
+
+          stealPokemon(lat, lng, function (pkms) {
+
+            if (pkms.length) {
+              console.log("\t", pkms.length, "pokemon stealed");
+              pokemons = pokemons.concat(pkms);
+            }
+
+            if (pokemons.length) {
+              let where = {
+                _id: {
+                  inq: pokemons.map(function(p) { return p.id; })
+                }
+              };
+
+              Pokemon.destroyAll(where, function(err, info) {
+                if (err) {
+                  console.log(err);
+                }
+                Pokemon.create(pokemons, function (err, obj) {
+                  if (err) {
+                    console.log(err);
+                  }
+                });
+              });
+
+              PokemonSpawn.destroyAll(where, function(err, info) {
+                if (err) {
+                  console.log(err);
+                }
+                PokemonSpawn.create(pokemons, function (err, obj) {
+                  if (err) {
+                    console.log(err);
+                  }
+                });
+              });
+            }
+          });
 
           if (gyms.length) {
             let where = {
@@ -198,29 +209,26 @@ module.exports = function(app) {
 
     console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
-    let lat = Number(req.params.lat);
-    let lng = Number(req.params.lng);
+    let lat = req.params.lat;
+    let lng = req.params.lng;
 
-    // Pre fill heartbeat result with concurrent api's
-    pokemons = stealPokemon(lat, lng, function (pokemons) {
-      var radiusFilter = {
-        where: {
-          position: {
-            near:        new GeoPoint({lat: lat, lng: lng}),
-            maxDistance: req.query.radius || 2000
-          }
+    var radiusFilter = {
+      where: {
+        position: {
+          near:        new GeoPoint({lat: lat, lng: lng}),
+          maxDistance: req.query.radius || 2000
         }
-      };
+      }
+    };
 
-      Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
-        if (!nearbyPokemon) {
-          nearbyPokemon = [];
-        }
-        nearbyPokemon.concat(pokemons)
-        res.json({
-          data:        nearbyPokemon,
-          data_length: nearbyPokemon.length
-        });
+    Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
+      if (!nearbyPokemon) {
+        nearbyPokemon = [];
+      }
+      nearbyPokemon.concat(pokemons)
+      res.json({
+        data:        nearbyPokemon,
+        data_length: nearbyPokemon.length
       });
     });
   }
@@ -236,7 +244,7 @@ module.exports = function(app) {
 
     request(goradarApiUrl, function (error, response, body) {
       if (error || response.statusCode !== 200) {
-        return cb(pokemons);
+        cb(pokemons);
       }
 
       body = JSON.parse(body);
@@ -251,7 +259,7 @@ module.exports = function(app) {
         pokemons.push({
           id:       genId,
           number:   pokemon.pokemon_id,
-          name:     pokemon.pokemon_name,
+          name:     pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, pokemon.pokemon_id),
           position: new GeoPoint({
             lat: pokemon.latitude,
             lng: pokemon.longitude
@@ -262,27 +270,7 @@ module.exports = function(app) {
         });
       }
 
-      if (pokemons.length) {
-        let where = {
-          _id: {
-            inq: pokemons.map(function(p) { return p.id; })
-          }
-        };
-
-        Pokemon.destroyAll(where, function(err, info) {
-          if (err) {
-            console.log(err);
-          }
-          Pokemon.create(pokemons, function (err, obj) {
-            if (err) {
-              console.log(err);
-            }
-
-            return cb(pokemons);
-          });
-        });
-      }
-
+      cb(pokemons);
     });
   }
 
