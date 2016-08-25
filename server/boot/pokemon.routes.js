@@ -114,63 +114,14 @@ module.exports = function(app) {
 
           if (pokemons.length) {
             console.log("\t", pokemons.length, "pokemon scanned");
+
+            saveToDatabase('pokemon', pokemons);
           }
 
-          stealPokemon(lat, lng, function (pkms) {
-
-            if (pkms.length) {
-              console.log("\t", pkms.length, "pokemon stealed");
-              pokemons = pokemons.concat(pkms);
-            }
-
-            if (pokemons.length) {
-              let where = {
-                _id: {
-                  inq: pokemons.map(function(p) { return p.id; })
-                }
-              };
-
-              Pokemon.destroyAll(where, function(err, info) {
-                if (err) {
-                  console.log(err);
-                }
-                Pokemon.create(pokemons, function (err, obj) {
-                  if (err) {
-                    console.log(err);
-                  }
-                });
-              });
-
-              PokemonSpawn.destroyAll(where, function(err, info) {
-                if (err) {
-                  console.log(err);
-                }
-                PokemonSpawn.create(pokemons, function (err, obj) {
-                  if (err) {
-                    console.log(err);
-                  }
-                });
-              });
-            }
-          });
-
           if (gyms.length) {
-            let where = {
-              _id: {
-                inq: gyms.map(function(g) { return g.id; })
-              }
-            };
+            console.log("\t", gyms.length, "gyms scanned");
 
-            Gym.destroyAll(where, function(err, info) {
-              if (err) {
-                console.log(err);
-              }
-              Gym.create(gyms, function (err, obj) {
-                if (err) {
-                  console.log(err);
-                }
-              });
-            });
+            saveToDatabase('gym', gyms);
           }
         })
         .catch(err => {
@@ -209,8 +160,8 @@ module.exports = function(app) {
 
     console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
-    let lat = req.params.lat;
-    let lng = req.params.lng;
+    let lat = Number(req.params.lat);
+    let lng = Number(req.params.lng);
 
     var radiusFilter = {
       where: {
@@ -221,15 +172,32 @@ module.exports = function(app) {
       }
     };
 
-    Pokemon.find(radiusFilter, function(err, nearbyPokemon) {
-      if (!nearbyPokemon) {
-        nearbyPokemon = [];
+    Pokemon.find(radiusFilter, function(err, pokemons) {
+      if (!pokemons) {
+        pokemons = [];
       }
-      nearbyPokemon.concat(pokemons)
-      res.json({
-        data:        nearbyPokemon,
-        data_length: nearbyPokemon.length
-      });
+
+      if (pokemons.length < 20) {
+        stealPokemon(lat, lng, function (stolenPokemons) {
+          pokemons = pokemons.concat(stolenPokemons);
+
+          res.json({
+            data:        pokemons,
+            data_length: pokemons.length
+          });
+
+          if (stolenPokemons.length) {
+            console.log("\t", stolenPokemons.length, "pokemon stolen");
+
+            saveToDatabase('pokemon', stolenPokemons);
+          }
+        });
+      } else {
+        res.json({
+          data:        pokemons,
+          data_length: pokemons.length
+        });
+      }
     });
   }
 
@@ -250,8 +218,7 @@ module.exports = function(app) {
       body = JSON.parse(body);
 
       for (var i = 0; i < body.pokemons.length; i++) {
-        let pokemon = body.pokemons[i];
-
+        let pokemon  = body.pokemons[i];
         let genId    = crypto.createHash('md5').update(pokemon.encounter_id + pokemon.spawnpoint_id).digest("hex");
         let now      = new Date();
         let expireAt = new Date(pokemon.disappear_time);
@@ -274,4 +241,59 @@ module.exports = function(app) {
     });
   }
 
+  function saveToDatabase(type, data) {
+    let where;
+
+    switch (type) {
+      case 'pokemon':
+        where = {
+          _id: {
+            inq: data.map(function(p) { return p.id; })
+          }
+        };
+
+        Pokemon.destroyAll(where, function(err, info) {
+          if (err) {
+            console.log(err);
+          }
+          Pokemon.create(data, function (err, obj) {
+            if (err) {
+              console.log(err);
+            }
+          });
+        });
+
+        PokemonSpawn.destroyAll(where, function(err, info) {
+          if (err) {
+            console.log(err);
+          }
+          PokemonSpawn.create(data, function (err, obj) {
+            if (err) {
+              console.log(err);
+            }
+          });
+        });
+        break;
+      case 'gym':
+        where = {
+          _id: {
+            inq: data.map(function(g) { return g.id; })
+          }
+        };
+
+        Gym.destroyAll(where, function(err, info) {
+          if (err) {
+            console.log(err);
+          }
+          Gym.create(data, function (err, obj) {
+            if (err) {
+              console.log(err);
+            }
+          });
+        });
+        break;
+      default:
+        console.warn("Not handled type in saveToDatabase()");
+    }
+  }
 };
