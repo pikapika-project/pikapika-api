@@ -132,19 +132,6 @@ module.exports = function(app) {
 
   function getPokemon(req, res, next) {
 
-    if (!req.params.lat || !req.params.lng) {
-      res
-        .status(404)
-        .json({
-          error: {
-            statusCode:    404,
-            statusMessage: "Missing parameters."
-          }
-        });
-
-      return;
-    }
-
     if (req.query.radius && req.query.radius > 50000) {
       res
         .status(400)
@@ -160,14 +147,19 @@ module.exports = function(app) {
 
     console.log("GET /pokemons request from", req.headers['cf-ipcountry'], "(", req.headers['cf-connecting-ip'], ")");
 
-    let lat = Number(req.params.lat);
-    let lng = Number(req.params.lng);
+    let lat    = Number(req.params.lat);
+    let lng    = Number(req.params.lng);
+    let radius = Number(req.query.radius) || 2000;
+    let swLat  = Number(req.query.swLat) || undefined;
+    let swLng  = Number(req.query.swLng) || undefined;
+    let neLat  = Number(req.query.neLat) || undefined;
+    let neLng  = Number(req.query.neLng) || undefined;
 
     var radiusFilter = {
       where: {
         position: {
           near:        new GeoPoint({lat: lat, lng: lng}),
-          maxDistance: req.query.radius || 2000
+          maxDistance: radius
         }
       }
     };
@@ -177,8 +169,8 @@ module.exports = function(app) {
         pokemons = [];
       }
 
-      if (pokemons.length < 50) {
-        stealPokemon(lat, lng, function (stolenPokemons) {
+      if (swLat && swLng && neLat && neLng && pokemons.length < ((12 * radius) / 1000)) {
+        stealPokemon({lat: swLat, lng: swLng}, {lat: neLat, lng: neLng}, function (stolenPokemons) {
           pokemons = pokemons.concat(stolenPokemons);
 
           res.json({
@@ -201,14 +193,9 @@ module.exports = function(app) {
     });
   }
 
-  function stealPokemon(lat, lng, cb) {
-    let pokemons = [];
-
-    let swLat =  lat - (Math.random() * 0.02);
-    let neLat =  lat + (Math.random() * 0.02);
-    let swLng =  lng - (Math.random() * 0.02);
-    let neLng =  lng + (Math.random() * 0.02);
-    let goradarApiUrl   = `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${swLat}&swLng=${swLng}&neLat=${neLat}&neLng=${neLng}&pokemon=true&pokestops=false&gyms=false`
+  function stealPokemon(sw, ne, cb) {
+    let pokemons      = [];
+    let goradarApiUrl = `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
 
     request(goradarApiUrl, function (error, response, body) {
       if (error || response.statusCode !== 200) {
