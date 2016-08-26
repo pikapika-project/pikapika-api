@@ -177,7 +177,7 @@ module.exports = function(app) {
         pokemons = [];
       }
 
-      if (pokemons.length < 20) {
+      if (pokemons.length < 50) {
         stealPokemon(lat, lng, function (stolenPokemons) {
           pokemons = pokemons.concat(stolenPokemons);
 
