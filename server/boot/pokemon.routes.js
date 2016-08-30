@@ -198,7 +198,7 @@ module.exports = function(app) {
     let goradarApiUrl = `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
 
     request(goradarApiUrl, function (error, response, body) {
-      if (error || response.statusCode !== 200) {
+      if (error || response.statusCode !== 200 || !body) {
         cb(pokemons);
       }
 
