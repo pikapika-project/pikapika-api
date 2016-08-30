@@ -169,7 +169,7 @@ module.exports = function(app) {
         pokemons = [];
       }
 
-      if (swLat && swLng && neLat && neLng && pokemons.length < ((12 * radius) / 1000)) {
+      if (pokemons.length < ((12 * radius) / 1000)) {
         stealPokemon({lat: swLat, lng: swLng}, {lat: neLat, lng: neLng}, function (stolenPokemons) {
           pokemons = pokemons.concat(stolenPokemons);
 
