@@ -150,10 +150,10 @@ module.exports = function(app) {
     let lat    = Number(req.params.lat);
     let lng    = Number(req.params.lng);
     let radius = Number(req.query.radius) || 2000;
-    let swLat  = Number(req.query.swLat) || undefined;
-    let swLng  = Number(req.query.swLng) || undefined;
-    let neLat  = Number(req.query.neLat) || undefined;
-    let neLng  = Number(req.query.neLng) || undefined;
+    let swLat  = Number(req.query.swLat)  || lat - (Math.random() * 0.02);
+    let swLng  = Number(req.query.swLng)  || lng - (Math.random() * 0.02);
+    let neLat  = Number(req.query.neLat)  || lat + (Math.random() * 0.02);
+    let neLng  = Number(req.query.neLng)  || lng + (Math.random() * 0.02);
 
     var radiusFilter = {
       where: {
