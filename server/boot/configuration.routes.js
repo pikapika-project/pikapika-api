@@ -7,7 +7,11 @@ module.exports = function(app) {
     var config = {
       last_version: {
         ios: "1.0.0",
-        android: "1.0.2"
+        android: "1.0.2",
+        lite: {
+          ios: "1.0.0",
+          android: "1.0.0"
+        }
       },
       ads: {
         reload_number: 4
