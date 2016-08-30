@@ -50,6 +50,9 @@ module.exports = function(app) {
 
     let client = pogobuf.Client();
 
+    if (process.env.NODE_ENV === "production") {
+      client.setProxy('http://us.proxymesh.com:31280')
+    }
     client.setAuthInfo('google', req.query.access_token);
     client.setPosition(lat, lng);
     client.setAutomaticLongConversionEnabled(false);
@@ -194,10 +197,15 @@ module.exports = function(app) {
   }
 
   function stealPokemon(sw, ne, cb) {
-    let pokemons      = [];
-    let goradarApiUrl = `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
+    let pokemons = [];
 
-    request(goradarApiUrl, function (error, response, body) {
+    var opts = {
+      url: `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
+    };
+    if (process.env.NODE_ENV === "production") {
+      opts.proxy = 'http://us.proxymesh.com:31280';
+    }
+    request(opts, function (error, response, body) {
       if (error || response.statusCode !== 200 || !body) {
         cb(pokemons);
       }
