@@ -14,7 +14,8 @@ module.exports = function(app) {
         }
       },
       ads: {
-        reload_number: 4
+        reload_number: 4,
+        click_number: 4
       },
       apk_url: "https://pikapika.io/pikapika-v120.apk"
     };
