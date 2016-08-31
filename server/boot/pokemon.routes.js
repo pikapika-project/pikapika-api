@@ -202,9 +202,9 @@ module.exports = function(app) {
     var opts = {
       url: `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
     };
-    if (process.env.NODE_ENV === "production") {
-      opts.proxy = 'http://us.proxymesh.com:31280';
-    }
+    //if (process.env.NODE_ENV === "production") {
+    //  opts.proxy = 'http://us.proxymesh.com:31280';
+    //}
     request(opts, function (error, response, body) {
       if (error || response.statusCode !== 200 || !body) {
         cb(pokemons);
