@@ -5,6 +5,19 @@ const pogobuf  = require('pogobuf'),
     crypto     = require('crypto'),
     request    = require('request');
 
+const proxies = [
+  //'173.234.232.97:3128',
+  '206.214.93.20:3128',
+  //'173.234.232.80:3128',
+  //'173.234.181.69:3128',
+  '206.214.93.99:3128',
+  '206.214.93.227:3128',
+  '89.47.28.124:3128',
+  '206.214.93.122:3128',
+  //'173.234.181.114:3128',
+  '89.47.28.198:3128'
+];
+
 module.exports = function(app) {
 
   Pokemon      = app.models.Pokemon;
@@ -51,7 +64,9 @@ module.exports = function(app) {
     let client = pogobuf.Client();
 
     if (process.env.NODE_ENV === "production") {
-      client.setProxy('http://us.proxymesh.com:31280')
+      let proxy = proxies[getRandomInt(0, proxies.length)];
+
+      client.setProxy(`http://${proxy}`)
     }
     client.setAuthInfo('google', req.query.access_token);
     client.setPosition(lat, lng);
@@ -202,9 +217,11 @@ module.exports = function(app) {
     var opts = {
       url: `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
     };
-    //if (process.env.NODE_ENV === "production") {
-    //  opts.proxy = 'http://us.proxymesh.com:31280';
-    //}
+    if (process.env.NODE_ENV === "production") {
+      let proxy = proxies[getRandomInt(0, proxies.length)];
+
+      opts.proxy = `http://${proxy}`;
+    }
     request(opts, function (error, response, body) {
       if (error || response.statusCode !== 200 || !body) {
         cb(pokemons);
@@ -290,5 +307,11 @@ module.exports = function(app) {
       default:
         console.warn("Not handled type in saveToDatabase()");
     }
+  }
+
+  function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min)) + min;
   }
 };
