@@ -226,13 +226,13 @@ module.exports = function(app) {
     }
     request(opts, function (error, response, body) {
       if (error || response.statusCode !== 200 || !body) {
-        cb(pokemons);
+        return cb(pokemons);
       }
 
       try {
         body = JSON.parse(body);
       } catch (err) {
-        cb(pokemons);
+        return cb(pokemons);
       }
 
       for (var i = 0; i < body.pokemons.length; i++) {
@@ -255,7 +255,7 @@ module.exports = function(app) {
         });
       }
 
-      cb(pokemons);
+      return cb(pokemons);
     });
   }
 
