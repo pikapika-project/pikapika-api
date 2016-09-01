@@ -215,9 +215,10 @@ module.exports = function(app) {
 
   function stealPokemon(sw, ne, cb) {
     let pokemons = [];
+    let now = new Date().getTime();
 
     var opts = {
-      url: `https://stop_fucking_with_us.goradar.io/raw_data?&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
+      url: `https://stop_fucking_with_us.goradar.io/raw_data_facebook?hash&key&time=${now}swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
     };
     if (process.env.NODE_ENV === "production") {
       let proxy = proxies[getRandomInt(0, proxies.length)];
