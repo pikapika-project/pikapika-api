@@ -231,7 +231,7 @@ module.exports = function(app) {
 
       try {
         body = JSON.parse(body);
-      } catch {
+      } catch (err) {
         cb(pokemons);
       }
 
