@@ -189,7 +189,9 @@ module.exports = function(app) {
 
       if (pokemons.length < ((12 * radius) / 1000)) {
         stealPokemon({lat: swLat, lng: swLng}, {lat: neLat, lng: neLng}, function (stolenPokemons) {
-          pokemons = pokemons.concat(stolenPokemons);
+          if (stolenPokemons.length) {
+            pokemons = pokemons.concat(stolenPokemons);
+          }
 
           res.json({
             data:        pokemons,
@@ -227,7 +229,11 @@ module.exports = function(app) {
         cb(pokemons);
       }
 
-      body = JSON.parse(body);
+      try {
+        body = JSON.parse(body);
+      } catch {
+        cb(pokemons);
+      }
 
       for (var i = 0; i < body.pokemons.length; i++) {
         let pokemon  = body.pokemons[i];
