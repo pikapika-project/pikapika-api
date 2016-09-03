@@ -213,7 +213,7 @@ module.exports = function(app) {
     let now = new Date().getTime();
 
     var opts = {
-      url: `https://stop_fucking_with_us.goradar.io/raw_data_facebook?hash&key&time=${now}&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
+      url: `https://stop_fucking_with_us.goradar.io/raw_data_facebook?hash=2619478351&key=3055&time=${now}&swLat=${sw.lat}&swLng=${sw.lng}&neLat=${ne.lat}&neLng=${ne.lng}&pokemon=true&pokestops=false&gyms=false`
     };
     if (process.env.NODE_ENV === "production") {
       let proxy = proxies[getRandomInt(0, proxies.length)];
