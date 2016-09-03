@@ -231,6 +231,10 @@ module.exports = function(app) {
         return cb(pokemons);
       }
 
+      if (!body.pokemons) {
+        return cb(pokemons);
+      }
+
       for (var i = 0; i < body.pokemons.length; i++) {
         let pokemon  = body.pokemons[i];
         let genId    = crypto.createHash('md5').update(pokemon.encounter_id + pokemon.spawnpoint_id).digest("hex");
