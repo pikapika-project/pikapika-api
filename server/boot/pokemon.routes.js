@@ -128,13 +128,17 @@ module.exports = function(app) {
           if (pokemons.length) {
             console.log("\t", pokemons.length, "pokemon scanned");
 
-            saveToDatabase('pokemon', pokemons);
+            for (let i = 0; i < pokemons.length; i++) {
+              saveToDatabase('pokemon', pokemons[i]);
+            }
           }
 
           if (gyms.length) {
             console.log("\t", gyms.length, "gyms scanned");
 
-            saveToDatabase('gym', gyms);
+            for (let i = 0; i < gyms.length; i++) {
+              saveToDatabase('gym', gyms[i]);
+            }
           }
         })
         .catch(err => {
@@ -196,7 +200,9 @@ module.exports = function(app) {
           if (stolenPokemons.length) {
             console.log("\t", stolenPokemons.length, "pokemon stolen");
 
-            saveToDatabase('pokemon', stolenPokemons);
+            for (let i = 0; i < stolenPokemons.length; i++) {
+              saveToDatabase('pokemon', stolenPokemons[i]);
+            }
           }
         });
       } else {
@@ -217,9 +223,9 @@ module.exports = function(app) {
     };
     if (process.env.NODE_ENV === "production") {
       let proxy = proxies[getRandomInt(0, proxies.length)];
-
       opts.proxy = `http://${proxy}`;
     }
+
     request(opts, function (error, response, body) {
       if (error || response.statusCode !== 200 || !body) {
         return cb(pokemons);
@@ -256,54 +262,24 @@ module.exports = function(app) {
   }
 
   function saveToDatabase(type, data) {
-    let where;
-
     switch (type) {
       case 'pokemon':
-        where = {
-          _id: {
-            inq: data.map(function(p) { return p.id; })
-          }
-        };
-
-        Pokemon.destroyAll(where, function(err, info) {
+        Pokemon.replaceOrCreate(data, function (err, model) {
           if (err) {
             console.log(err);
           }
-          Pokemon.create(data, function (err, obj) {
-            if (err) {
-              console.log(err);
-            }
-          });
         });
-
-        PokemonSpawn.destroyAll(where, function(err, info) {
+        PokemonSpawn.replaceOrCreate(data, function (err, model) {
           if (err) {
             console.log(err);
           }
-          PokemonSpawn.create(data, function (err, obj) {
-            if (err) {
-              console.log(err);
-            }
-          });
         });
         break;
       case 'gym':
-        where = {
-          _id: {
-            inq: data.map(function(g) { return g.id; })
-          }
-        };
-
-        Gym.destroyAll(where, function(err, info) {
+        Gym.replaceOrCreate(data, function (err, model) {
           if (err) {
             console.log(err);
           }
-          Gym.create(data, function (err, obj) {
-            if (err) {
-              console.log(err);
-            }
-          });
         });
         break;
       default:
